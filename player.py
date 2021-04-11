@@ -2,9 +2,10 @@
 This file contains the necessary class and methods for a player object
 """
 import operator
+from typing import Any, Tuple
 
 
-class player:
+class Player:
     """Player class, incorporates all current state of a player object.
 
     Attributes
@@ -37,12 +38,11 @@ class player:
         self.id = id
         self._position = initial_pos
         self._vision_field = vision_field
-        self._score =
-        {
-         'key': 0,
-         'frag': 0,
-         'treasure': 0
-        }
+        self._score = {
+                       'key': 0,
+                       'frag': 0,
+                       'treasure': 0
+                       }
 
     def get_pos(self) -> Tuple[int, int, int]:
         """Returns the current position of the player."""
