@@ -2,5 +2,5 @@
 This File contains the necessary classes and functions for each game object
 """
 
-class obstacle:
-    """Obstacle Class"""
+class player:
+    """Player class"""
