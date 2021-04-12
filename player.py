@@ -24,18 +24,18 @@ class Player:
         Dictionary mapping different scoring types (number of keys, fragments,
         or opened treasure chests) to the corresponding value.
     """
-    id: str
+    user_id: str
     _position: Tuple[int, int]
     _score: dict[str, int]
     _vision_field: int
 
-    def __init__(self, id: str,
+    def __init__(self, user_id: str,
                  initial_pos: Tuple[int, int],
                  vision_field: int) -> None:
         """Initialize a new player with the given initial position and vision
         field radius.
         """
-        self.id = id
+        self.user_id = user_id
         self._position = initial_pos
         self._vision_field = vision_field
         self._score = {
@@ -48,13 +48,10 @@ class Player:
         """Returns the current position of the player."""
         return self._position
 
-    def update_pos(self, change: Tuple[int, int]) -> None:
+    def update_pos(self, new_pos: Tuple[int, int]) -> None:
         """Updates the position of the player with the given change in the
         coordinates"""
-        new_pos = tuple(map(operator.add, self._position, change))
-
-        # The to-integer operation here is for aligning with position type "Tuple[int, int]"
-        self._position = (int(new_pos[0]), int(new_pos[1]))
+        self._position = new_pos
 
     def get_score(self, score_type: str) -> int:
         """Returns the current score of the indicated type(keys, fragments...)
