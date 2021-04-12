@@ -13,6 +13,8 @@ class Player:
     user_id : string
         Represents the user id of the player.
         This can be used to identify different players on the interface.
+    score : int
+        Keep track of current number of treasure the player has found.
     _position : Tuple[int, int, int]
         Current position of a player on the map.
         Represented by a tuple of integers consisting of the (x, y)
@@ -20,13 +22,10 @@ class Player:
     _vision_field : int
         This is the viewing distance (bright regions) of a player.
         Represented by an integer indicating the radius of vision
-    _score : dict[str, int]
-        Dictionary mapping different scoring types (number of keys, fragments,
-        or opened treasure chests) to the corresponding value.
     """
     user_id: str
+    score: int
     _position: Tuple[int, int]
-    _score: dict[str, int]
     _vision_field: int
 
     def __init__(self, user_id: str,
@@ -38,11 +37,7 @@ class Player:
         self.user_id = user_id
         self._position = initial_pos
         self._vision_field = vision_field
-        self._score = {
-                       'key': 0,
-                       'fragments': 0,
-                       'treasure': 0
-                       }
+        self.score = 0
 
     def get_pos(self) -> Tuple[int, int]:
         """Returns the current position of the player."""
@@ -53,25 +48,10 @@ class Player:
         coordinates"""
         self._position = new_pos
 
-    def get_score(self, score_type: str) -> int:
-        """Returns the current score of the indicated type(keys, fragments...)
-
-        Note that this is accumulative. That is, with multiple games run with the
-        same player, the score won't reset. Instead, the specific score for each
-        game is recorded by the GameMap object.
-        """
-        if score_type in self._score:
-            return self._score[score_type]
-        else:
-            raise ValueError
-
-    def update_score(self, score_type: str, change: int) -> None:
+    def update_score(self, change: int) -> None:
         """Updates the current score of the indicated type(keys, fragments...)
         with the given value of change"""
-        if score_type in self._score:
-            self._score[score_type] += change
-        else:
-            raise ValueError
+        self.score += change
 
     def set_vision_radius(self, radius: int) -> None:
         """Updates the vision field radius (this is for testing purposes or for
