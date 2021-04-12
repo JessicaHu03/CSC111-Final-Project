@@ -2,7 +2,7 @@
 This file contains the necessary class and methods for a player object
 """
 import operator
-from typing import Any, Tuple
+from typing import Tuple
 
 
 class Player:
@@ -51,25 +51,28 @@ class Player:
     def update_pos(self, change: Tuple[int, int]) -> None:
         """Updates the position of the player with the given change in the
         coordinates"""
-        self._position = tuple(map(operator.add, self._position, change))
+        new_pos = tuple(map(operator.add, self._position, change))
 
-    def get_score(self, type: str) -> int:
+        # The to-integer operation here is for aligning with position type "Tuple[int, int]"
+        self._position = (int(new_pos[0]), int(new_pos[1]))
+
+    def get_score(self, score_type: str) -> int:
         """Returns the current score of the indicated type(keys, fragments...)
         """
-        if type in self._score:
-            return self._score[type]
+        if score_type in self._score:
+            return self._score[score_type]
         else:
             raise ValueError
 
-    def update_score(self, type: str, change: int) -> None:
+    def update_score(self, score_type: str, change: int) -> None:
         """Updates the current score of the indicated type(keys, fragments...)
         with the given value of change"""
-        if type in self._score:
-            self._score[type] += change
+        if score_type in self._score:
+            self._score[score_type] += change
         else:
             raise ValueError
 
     def set_vision_radius(self, radius: int) -> None:
         """Updates the vision field radius (this is for testing purposes or for
-        certain addtional feature)"""
+        certain additional feature)"""
         self._vision_field = radius
