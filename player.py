@@ -25,7 +25,7 @@ class Player:
         or opened treasure chests) to the corresponding value.
     """
     id: str
-    _position: Tuple[int, int, int]
+    _position: Tuple[int, ...]
     _score: dict[str, int]
     _vision_field: int
 
@@ -44,11 +44,11 @@ class Player:
                        'treasure': 0
                        }
 
-    def get_pos(self) -> Tuple[int, int, int]:
+    def get_pos(self) -> Tuple[int, ...]:
         """Returns the current position of the player."""
         return self._position
 
-    def update_pos(self, change: Tuple[int, int, int]) -> None:
+    def update_pos(self, change: Tuple[int, ...]) -> None:
         """Updates the position of the player with the given change in the
         coordinates"""
         self._position = tuple(map(operator.add, self._position, change))
@@ -68,3 +68,8 @@ class Player:
             self._score[type] += change
         else:
             raise ValueError
+
+    def set_vision_radius(self, radius: int) -> None:
+        """Updates the vision field radius (this is for testing purposes or for
+        certain addtional feature)"""
+        self._vision_field = radius
