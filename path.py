@@ -3,7 +3,7 @@ a number of game runs with a fixed map.
 """
 
 from __future__ import annotations
-from typing import Any, Tuple
+from typing import Any, Tuple, List
 import operator
 
 
@@ -119,3 +119,8 @@ class Path:
     def update_path(self, movement: str, step: int) -> None:
         """Add a new position (Vertex) to the path (_graph)"""
         self._graph.add_vertex(self.next_pos(movement, step))
+
+    def get_possible_movement(self, game_map: GameMap) -> List[str]:
+        """Calculate possible movement the player can make based on
+        current position in the given game map."""
+
