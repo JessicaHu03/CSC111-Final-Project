@@ -5,6 +5,7 @@ a number of game runs with a fixed map.
 from __future__ import annotations
 from typing import Any, Tuple, List
 import operator
+from player import Player
 
 
 class _Vertex:
@@ -57,7 +58,7 @@ class _Vertex:
 class Graph:
     """A graph.
     """
-    _vertices: dict[int, _Vertex]
+    _vertices: dict[Tuple[int, int], _Vertex]
 
     def __init__(self) -> None:
         """Initialize an empty graph (no vertices or edges)."""
@@ -74,29 +75,55 @@ class Graph:
         The new vertex is not adjacent to any other vertices.
         """
         new_vertex = _Vertex(pos, set())
-        self._vertices[self.length()] = new_vertex
+        self._vertices[pos] = new_vertex
 
-    def get_last_vertex(self) -> _Vertex:
-        """Return the last vertex"""
-        return list(self._vertices.values())[-1]
+    def add_edge(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> None:
+        """Add an edge between the two vertices with the given items in this graph.
+
+        Raise a ValueError if item1 or item2 do not appear as vertices in this graph.
+
+        Preconditions:
+            - item1 != item2
+        """
+        if pos1 in self._vertices and pos2 in self._vertices:
+            # Add the edge between the two vertices
+            v1 = self._vertices[pos1]
+            v2 = self._vertices[pos2]
+
+            v1.neighbours.add(v2)
+            v2.neighbours.add(v1)
+        else:
+            raise ValueError
+
+    def get_vertex(self, pos: Tuple[int, int]) -> _Vertex:
+        return self._vertices[pos]
+
+    def get_vertices(self) -> dict[Tuple[int, int], _Vertex]:
+        return self._vertices
 
 
 class Path:
+    # TODO Implement case when meets a point in the path
     """A path that records player's path movements utilizing the Graph
     data structure"""
     _graph: Graph
+    _player: Player
+    move_count: int
     # _game_map: GameMap
 
     # def __init__(self, game_map: GameMap) -> None:
-    def __init__(self, graph: Graph) -> None:
+    def __init__(self, graph: Graph, player: Player) -> None:
         """Initialize the default path with the given graph and map"""
         self._graph = graph
+        self.move_count = 0
         # self._game_map = game_map
+
+    def get_graph(self) -> Graph:
+        return self._graph
 
     def current_pos(self) -> Tuple[int, int]:
         """Return current position in the path"""
-        pos = self._graph.get_last_vertex().pos
-        return pos
+        return self._player.get_pos()
 
     def next_pos(self, movement: str, step: int) -> Tuple[int, int]:
         """Returns the next position coordinate with the given movement and
@@ -116,11 +143,26 @@ class Path:
 
         return next_pos
 
-    def update_path(self, movement: str, step: int) -> None:
-        """Add a new position (Vertex) to the path (_graph)"""
-        self._graph.add_vertex(self.next_pos(movement, step))
+    def update_move_count(self, change: int) -> None:
+        """Updates movement count"""
+        self.move_count += change
 
-    def get_possible_movement(self, game_map: GameMap) -> List[str]:
+    """If movement is possible"""
+    def update_path(self, new_pos:Tuple[int, int]) -> None:
+        """Add a new position (Vertex) to the path (_graph)"""
+        if new_pos not in self._graph.get_vertices():
+            self._graph.add_vertex(new_pos)
+
+        self._graph.add_edge(self.current_pos(), new_pos)
+
+    def get_possible_movement(self, game_map: GameMap, step: int) -> List[str]:
         """Calculate possible movement the player can make based on
         current position in the given game map."""
+        movements = ['right', 'left', 'up', 'down']
+        possible_movements = []
+        for move in movements:
+            if self.next_pos(move, step) does not collide:
+                possible_movements.append(move)
+
+
 

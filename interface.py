@@ -6,8 +6,7 @@ interface for the game.
 import pygame
 from pygame.colordict import THECOLORS
 
-SCREEN = pygame.display.set_mode((1200, 1000))
-GRID_SIZE = 8
+GRID_SIZE = 20
 
 
 def draw_grid(screen: pygame.Surface) -> None:
@@ -28,6 +27,7 @@ def draw_grid(screen: pygame.Surface) -> None:
 
 
 def run_game() -> None:
+    SCREEN = pygame.display.set_mode((1200, 1000))
     exit_game = False
     pygame.init()
 

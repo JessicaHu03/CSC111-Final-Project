@@ -55,9 +55,16 @@ class GameMap:
         else:
             print("Invalid score type")
 
-    def generate_obstacles(self, includes: Iterable):
+    def generate_obstacles(self):
         """Generates the obstacles on the map with the required obstacle types.
 
         includes: a list of required obstacle types (mountain, river...)
         """
         map_occupy = self._difficulty * 0.15
+        size = self._width * self._height
+        obstacle_size = 0
+
+        while obstacle_size <= map_occupy * size:
+
+
+
