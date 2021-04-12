@@ -74,10 +74,10 @@ class Graph:
         The new vertex is not adjacent to any other vertices.
         """
         new_vertex = _Vertex(pos, set())
-
         self._vertices[self.length()] = new_vertex
 
     def get_last_vertex(self) -> _Vertex:
+        """Return the last vertex"""
         return list(self._vertices.values())[-1]
 
 
@@ -94,8 +94,8 @@ class Path:
         # self._game_map = game_map
 
     def current_pos(self) -> Tuple[int, int]:
+        """Return current position in the path"""
         pos = self._graph.get_last_vertex().pos
-
         return pos
 
     def next_pos(self, movement: str, step: int) -> Tuple[int, int]:
@@ -117,5 +117,5 @@ class Path:
         return next_pos
 
     def update_path(self, movement: str, step: int) -> None:
+        """Add a new position (Vertex) to the path (_graph)"""
         self._graph.add_vertex(self.next_pos(movement, step))
-
