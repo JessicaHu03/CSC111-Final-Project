@@ -10,7 +10,7 @@ class Player:
 
     Attributes
     ----------
-    id : string
+    user_id : string
         Represents the user id of the player.
         This can be used to identify different players on the interface.
     _position : Tuple[int, int, int]
