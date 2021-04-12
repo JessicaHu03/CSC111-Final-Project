@@ -6,10 +6,8 @@ interface for the game.
 import pygame
 from pygame.colordict import THECOLORS
 
-pygame.init()
 SCREEN = pygame.display.set_mode((1200, 1000))
 GRID_SIZE = 8
-EXIT = False
 
 
 def draw_grid(screen: pygame.Surface) -> None:
@@ -28,13 +26,17 @@ def draw_grid(screen: pygame.Surface) -> None:
         y = row * (height // GRID_SIZE)
         pygame.draw.line(screen, color, (0, y), (width, y))
 
+
 def run_game() -> None:
+    exit_game = False
+    pygame.init()
+
     # TODO: Finish this module
-    while not EXIT:
+    while not exit_game:
         for event in pygame.event.get():
             draw_grid(SCREEN)
             if event.type == pygame.QUIT:
-                EXIT = True
+                exit_game = True
         pygame.display.flip()
 
     pygame.quit()
