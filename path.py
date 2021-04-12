@@ -15,7 +15,7 @@ class _Vertex:
 
     def __init__(self, pos: Tuple[int, int],
                  neighbours: set[_Vertex]) -> None:
-        """Initialize a new vertex with the given item and neighbours."""
+        """Initialize a new vertex with the given position and neighbours."""
         self.pos = pos
         self.neighbours = neighbours
 
@@ -101,20 +101,6 @@ class Path:
     def next_pos(self, movement: str, step: int) -> Tuple[int, int]:
         """Returns the next position coordinate with the given movement and
         step size.
-
-        Parameters
-        ----------
-        movement : str
-            Indicates the desired movement, available from (left, right, up,
-            down).
-        step : int
-            Step size for each individual movement.
-
-        Returns
-        -------
-        Tuple[int, int]
-            Coordinate of the next position
-
         """
         coord_change = {'left': (-step, 0),
                         'right': (step, 0),
