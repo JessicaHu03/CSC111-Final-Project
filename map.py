@@ -3,7 +3,7 @@ This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
 import pygame as pg
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Any
 
 
 class GameMap:
@@ -34,10 +34,12 @@ class GameMap:
             'treasure': 1
         }
 
-    def get_difficulty(self):
+    def get_difficulty(self) -> int:
+        """Return the difficulty of this map"""
         return self._difficulty
 
-    def get_game_state(self, score_type: str):
+    def get_game_state(self, score_type: str) -> Any:
+        """Return the game_state of this map"""
         if score_type == 'all':
             return self._state
         else:
@@ -46,7 +48,8 @@ class GameMap:
             else:
                 print("Invalid score type")
 
-    def update_game_state(self, score_type: str, change: int):
+    def update_game_state(self, score_type: str, change: int) -> None:
+        """Update game_state of this map"""
         if score_type in self._state:
             self._state[score_type] += change
         else:
@@ -58,6 +61,3 @@ class GameMap:
         includes: a list of required obstacle types (mountain, river...)
         """
         map_occupy = self._difficulty * 0.15
-
-
-
