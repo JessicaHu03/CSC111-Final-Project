@@ -40,7 +40,7 @@ class Player:
         self._vision_field = vision_field
         self._score = {
                        'key': 0,
-                       'frag': 0,
+                       'fragments': 0,
                        'treasure': 0
                        }
 
@@ -55,6 +55,10 @@ class Player:
 
     def get_score(self, score_type: str) -> int:
         """Returns the current score of the indicated type(keys, fragments...)
+
+        Note that this is accumulative. That is, with multiple games run with the
+        same player, the score won't reset. Instead, the specific score for each
+        game is recorded by the GameMap object.
         """
         if score_type in self._score:
             return self._score[score_type]

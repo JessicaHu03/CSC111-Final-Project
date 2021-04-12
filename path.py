@@ -85,9 +85,9 @@ class Path:
     """A path that records player's path movements utilizing the Graph
     data structure"""
     _graph: Graph
-    # _game_map: Game_Map
+    # _game_map: GameMap
 
-    # def __init__(self, game_map: Game_Map) -> None:
+    # def __init__(self, game_map: GameMap) -> None:
     def __init__(self, graph: Graph) -> None:
         """Initialize the default path with the given graph and map"""
         self._graph = graph
