@@ -55,16 +55,47 @@ class GameMap:
         else:
             print("Invalid score type")
 
-    def generate_obstacles(self):
+    def generate_obstacles():
         """Generates the obstacles on the map with the required obstacle types.
-
-        includes: a list of required obstacle types (mountain, river...)
         """
-        map_occupy = self._difficulty * 0.15
-        size = self._width * self._height
-        obstacle_size = 0
+        difficulty = 2
+        width = 800
+        height = 800
+        step = int(width / 40)
+        obstacle_col = difficulty * 4
+        obstacle_type = ['mountain', 'river']
+        origin_x = 0
+        col_num = 1
+        obstacles = []
+        finish_gen = False
+        x = 0
 
-        while obstacle_size <= map_occupy * size:
+        while col_num <= obstacle_col and not finish_gen:
+            # obstacle = random.choice(obstacle_type)
+
+            col_left = obstacle_col
+
+            # rect_x = 0
+            x = round_ten(random.randint(origin_x + int(step),
+                                         origin_x + int(step) + int(width / (difficulty * 10))))
+            y = round_ten(random.randint(int(step * 3), int(height * 0.5)))
+
+            if x < width * 0.9:
+                rect_x = round_ten(random.randint(int(width / obstacle_col * 0.2), int(width / obstacle_col)))
+                rect_y = round_ten(random.randint(int(height * 0.2), int(height * 0.75)))
+                if x + rect_x > 800:
+                    rect_x = 800 - x
+
+                obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
+                obstacles.append(obstacle_rect)
+
+                origin_x = (x + rect_x)
+                col_num += 1
+                col_left -= 1
+            else:
+                finish_gen = True
+
+        return obstacles
 
 
 
