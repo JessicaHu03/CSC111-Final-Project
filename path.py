@@ -3,7 +3,7 @@ a number of game runs with a fixed map.
 """
 
 from __future__ import annotations
-from typing import Any
+from typing import Any, Tuple
 import operator
 
 
@@ -47,7 +47,7 @@ class _Vertex:
             - self not in visited
         """
         visited.add(self)
-        print(self.item)
+        print(self.pos)
 
         for u in self.neighbours:
             if u not in visited:
@@ -62,6 +62,7 @@ class Graph:
     def __init__(self) -> None:
         """Initialize an empty graph (no vertices or edges)."""
         self._vertices = dict()
+        self.add_vertex((0, 0))
 
     def length(self) -> int:
         """Returns the number of vertices"""
@@ -77,10 +78,7 @@ class Graph:
         self._vertices[self.length()] = new_vertex
 
     def get_last_vertex(self) -> _Vertex:
-        if len(self._vertices) != 0:
-            return list(self._vertices.values())[-1]
-        else:
-            return (0, 0)
+        return list(self._vertices.values())[-1]
 
 
 class Path:
@@ -90,13 +88,15 @@ class Path:
     # _game_map: Game_Map
 
     # def __init__(self, game_map: Game_Map) -> None:
-    def __init__(self) -> None:
+    def __init__(self, graph: Graph) -> None:
         """Initialize the default path with the given graph and map"""
-        self._graph = Graph()
+        self._graph = graph
         # self._game_map = game_map
 
     def current_pos(self) -> Tuple[int, int]:
-        return self._graph.get_last_vertex().pos
+        pos = self._graph.get_last_vertex().pos
+
+        return pos
 
     def next_pos(self, movement: str, step: int) -> Tuple[int, int]:
         """Returns the next position coordinate with the given movement and
@@ -116,22 +116,20 @@ class Path:
             Coordinate of the next position
 
         """
-        next_pos = self.current_pos()
         coord_change = {'left': (-step, 0),
                         'right': (step, 0),
                         'up': (0, step),
                         'down': (0, -step)}
         if movement in coord_change:
             next_pos = tuple(map(operator.add,
-                                 self.current_pos,
+                                 self.current_pos(),
                                  coord_change[movement]))
         else:
-            raise ValueError
+            next_pos = self.current_pos()
+            print('Invalid Movement')
 
         return next_pos
 
-    def update_path(self, movement: str) -> None:
-        try:
-            self._graph.add_vertex(self.next_pos(movement))
-        except ValueError:
-            pass
+    def update_path(self, movement: str, step: int) -> None:
+        self._graph.add_vertex(self.next_pos(movement, step))
+
