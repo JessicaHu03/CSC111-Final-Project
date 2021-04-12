@@ -15,7 +15,7 @@ class Player:
         This can be used to identify different players on the interface.
     _position : Tuple[int, int, int]
         Current position of a player on the map.
-        Represented by a tuple of integers consisting of the (x, y, z)
+        Represented by a tuple of integers consisting of the (x, y)
         coordinates.
     _vision_field : int
         This is the viewing distance (bright regions) of a player.
@@ -25,12 +25,12 @@ class Player:
         or opened treasure chests) to the corresponding value.
     """
     id: str
-    _position: Tuple[int, ...]
+    _position: Tuple[int, int]
     _score: dict[str, int]
     _vision_field: int
 
     def __init__(self, id: str,
-                 initial_pos: Tuple[int, int, int],
+                 initial_pos: Tuple[int, int],
                  vision_field: int) -> None:
         """Initialize a new player with the given initial position and vision
         field radius.
@@ -44,11 +44,11 @@ class Player:
                        'treasure': 0
                        }
 
-    def get_pos(self) -> Tuple[int, ...]:
+    def get_pos(self) -> Tuple[int, int]:
         """Returns the current position of the player."""
         return self._position
 
-    def update_pos(self, change: Tuple[int, ...]) -> None:
+    def update_pos(self, change: Tuple[int, int]) -> None:
         """Updates the position of the player with the given change in the
         coordinates"""
         self._position = tuple(map(operator.add, self._position, change))
