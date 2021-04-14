@@ -43,6 +43,7 @@ class GameMap:
             'rock': (THECOLORS['brown'], 2),
             'river': (THECOLORS['blue'], 3)
         }
+        self._obstacles = self.generate_obstacles()
 
     def get_obstacles(self) -> List[Tuple[pg.Rect, str]]:
         """Return the generated obstacles of this map"""
@@ -72,8 +73,8 @@ class GameMap:
     def generate_obstacles(self):
         """Generates the obstacles on the map with the required obstacle types.
 
-        Calling this function will update the attribute of the game map. For our
-        purposes we should only call this once for each game map.
+        Calling this function will not update the obstacles attribute of the map.
+        As it is only meant to be called in the initialization of the game map.
         """
         col_width = (6 - self._difficulty) * self._h_step * 2
         col_num = int(self._width / col_width) + 1
@@ -108,7 +109,7 @@ class GameMap:
                 obstacle_col.clear()
                 obstacle_info.clear()
 
-            self._obstacles = obstacles_ret
+        return obstacles_ret
 
     def _generate_helper(self, col_count: int, obstacle: str):
         """Generates a single obstacle object in the given column"""
