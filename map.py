@@ -2,7 +2,7 @@
 This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
-from typing import Tuple, Any, Dict
+from typing import Tuple, Any, Dict, List
 from pygame import THECOLORS
 import pygame as pg
 import numpy as np
@@ -22,8 +22,9 @@ class GameMap:
     _difficulty: int
     _h_step: int
     _v_step: int
-    _state: dict[str, int]
-    _obstacle_type: dict[str, Any]
+    _state: Dict[str, int]
+    _obstacles: List[Tuple[pg.Rect, str]]
+    _obstacle_type: Dict[str, Any]
 
     def __init__(self, difficulty: int, screen_size: Tuple[int, int], div: int):
         """Initializes GameMap object with the given game difficulty, movement step size,
@@ -42,6 +43,10 @@ class GameMap:
             'rock': (THECOLORS['brown'], 2),
             'river': (THECOLORS['blue'], 3)
         }
+
+    def get_obstacles(self) -> List[Tuple[pg.Rect, str]]:
+        """Return the generated obstacles of this map"""
+        return self._obstacles
 
     def get_difficulty(self) -> int:
         """Return the difficulty of this map"""
@@ -66,6 +71,9 @@ class GameMap:
 
     def generate_obstacles(self):
         """Generates the obstacles on the map with the required obstacle types.
+
+        Calling this function will update the attribute of the game map. For our
+        purposes we should only call this once for each game map.
         """
         col_width = (6 - self._difficulty) * self._h_step * 2
         col_num = int(self._width / col_width) + 1
@@ -100,7 +108,7 @@ class GameMap:
                 obstacle_col.clear()
                 obstacle_info.clear()
 
-        return obstacles_ret
+            self._obstacles = obstacles_ret
 
     def _generate_helper(self, col_count: int, obstacle: str):
         """Generates a single obstacle object in the given column"""

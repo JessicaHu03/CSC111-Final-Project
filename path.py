@@ -5,6 +5,7 @@ a number of game runs with a fixed map.
 from __future__ import annotations
 from typing import Any, Tuple, List
 import operator
+from map import GameMap
 from player import Player
 
 
@@ -103,20 +104,20 @@ class Graph:
 
 
 class Path:
-    # TODO Implement case when meets a point in the path
     """A path that records player's path movements utilizing the Graph
     data structure"""
     _graph: Graph
     _player: Player
     move_count: int
-    # _game_map: GameMap
+    _game_map: GameMap
 
-    # def __init__(self, game_map: GameMap) -> None:
-    def __init__(self, graph: Graph, player: Player) -> None:
+    def __init__(self, game_map: GameMap,
+                 graph: Graph, player: Player) -> None:
         """Initialize the default path with the given graph and map"""
-        self._graph = graph
         self.move_count = 0
-        # self._game_map = game_map
+        self._graph = graph
+        self._player = player
+        self._game_map = game_map
 
     def get_graph(self) -> Graph:
         return self._graph
@@ -143,13 +144,12 @@ class Path:
 
         return next_pos
 
-    def update_move_count(self, change: int) -> None:
-        """Updates movement count"""
-        self.move_count += change
-
-    """If movement is possible"""
     def update_path(self, new_pos:Tuple[int, int]) -> None:
-        """Add a new position (Vertex) to the path (_graph)"""
+        """Add a new position (Vertex) to the path (_graph)
+
+        This only happens for possible movements, after which is checked
+        in advance
+        """
         if new_pos not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
 
@@ -161,8 +161,13 @@ class Path:
         movements = ['right', 'left', 'up', 'down']
         possible_movements = []
         for move in movements:
-            if self.next_pos(move, step) does not collide:
-                possible_movements.append(move)
+            next_pos = self.next_pos(move, step)
+            check = []
+            for obstacle in game_map.get_obstacles():
+                if not any[obstacle[0].collidepoint(next_pos)]:
+                    possible_movements.append(move)
+
+        return possible_movements
 
 
 
