@@ -125,14 +125,14 @@ class Path:
         """Return current position in the path"""
         return self._player.get_pos()
 
-    def next_pos(self, movement: str, step: int) -> Tuple[int, int]:
+    def next_pos(self, movement: str, h_step: int, v_step) -> Tuple[int, int]:
         """Returns the next position coordinate with the given movement and
         step size.
         """
-        coord_change = {'left': (-step, 0),
-                        'right': (step, 0),
-                        'up': (0, step),
-                        'down': (0, -step)}
+        coord_change = {'left': (-h_step, 0),
+                        'right': (h_step, 0),
+                        'up': (0, v_step),
+                        'down': (0, -v_step)}
         if movement in coord_change:
             next_pos = tuple(map(operator.add,
                                  self.current_pos(),

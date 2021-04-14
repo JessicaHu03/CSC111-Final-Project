@@ -2,8 +2,12 @@
 This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
+from typing import Tuple, Any, Dict
+from pygame import THECOLORS
 import pygame as pg
-from typing import Iterable, Tuple, Any
+import numpy as np
+import random
+import time
 
 
 class GameMap:
@@ -16,22 +20,27 @@ class GameMap:
     _width: int
     _height: int
     _difficulty: int
-    _step_size: int
+    _h_step: int
+    _v_step: int
     _state: dict[str, int]
+    _obstacle_type: dict[str, Any]
 
-    def __init__(self, difficulty: int,
-                 step_size: int,
-                 screen_size: Tuple[int, int]):
+    def __init__(self, difficulty: int, screen_size: Tuple[int, int], div: int):
         """Initializes GameMap object with the given game difficulty, movement step size,
         and window size"""
         self._width = screen_size[0]
         self._height = screen_size[1]
         self._difficulty = difficulty
-        self._step_size = step_size
+        self._h_step = int(self._width / div)
+        self._v_step = int(self._height / div)
         self._state = {
             'keys': 0,
             'fragments': 0,
             'treasure': 1
+        }
+        self._obstacle_type = {
+            'rock': (THECOLORS['brown'], 2),
+            'river': (THECOLORS['blue'], 3)
         }
 
     def get_difficulty(self) -> int:
@@ -55,47 +64,87 @@ class GameMap:
         else:
             print("Invalid score type")
 
-    def generate_obstacles():
+    def generate_obstacles(self):
         """Generates the obstacles on the map with the required obstacle types.
         """
-        difficulty = 2
-        width = 800
-        height = 800
-        step = int(width / 40)
-        obstacle_col = difficulty * 4
-        obstacle_type = ['mountain', 'river']
-        origin_x = 0
-        col_num = 1
-        obstacles = []
-        finish_gen = False
-        x = 0
+        col_width = (6 - self._difficulty) * self._h_step * 2
+        col_num = int(self._width / col_width) + 1
+        col_count = 1
+        obstacles_ret = []
+        obstacle_col = []
+        obstacle_info = []
 
-        while col_num <= obstacle_col and not finish_gen:
-            # obstacle = random.choice(obstacle_type)
+        while col_count < col_num:
+            print("Generating obstacles on column:" + str(col_count), end='\r')
+            time.sleep(0.1)
+            obstacle = random.choice(list(self._obstacle_type.keys()))
 
-            col_left = obstacle_col
+            rect_gen, rect_height = self._generate_helper(col_count, obstacle)
+            obstacle_col.append((rect_gen, obstacle))
+            obstacle_info.append(rect_height)
 
-            # rect_x = 0
-            x = round_ten(random.randint(origin_x + int(step),
-                                         origin_x + int(step) + int(width / (difficulty * 10))))
-            y = round_ten(random.randint(int(step * 3), int(height * 0.5)))
+            temp_col = [rect[0] for rect in obstacle_col]
+            counter = 0
+            for r in temp_col:
+                if r.collidelistall(temp_col) != -1:
+                    counter += 1
+                    temp_col.remove(r)
 
-            if x < width * 0.9:
-                rect_x = round_ten(random.randint(int(width / obstacle_col * 0.2), int(width / obstacle_col)))
-                rect_y = round_ten(random.randint(int(height * 0.2), int(height * 0.75)))
-                if x + rect_x > 800:
-                    rect_x = 800 - x
+            y = np.arange(0, self._height)
+            for x in obstacle_info:
+                remove_range(x[0], x[1], y)
 
-                obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
-                obstacles.append(obstacle_rect)
+            if counter >= self._difficulty * 2 or len(y) <= self._difficulty / 2 * self._v_step:
+                obstacles_ret.extend(obstacle_col)
+                col_count += 1
+                obstacle_col.clear()
+                obstacle_info.clear()
 
-                origin_x = (x + rect_x)
-                col_num += 1
-                col_left -= 1
-            else:
-                finish_gen = True
+        return obstacles_ret
 
-        return obstacles
+    def _generate_helper(self, col_count: int, obstacle: str):
+        """Generates a single obstacle object in the given column"""
+        col_width = (6 - self._difficulty) * self._h_step * 2
+
+        x = col_count * col_width + 2 * self._h_step
+        y = random.randrange(0, int(0.9 * self._height), self._v_step)
+
+        rect_x = col_width - self._h_step * 2
+        rect_y = random.randrange(rect_x, self._obstacle_type[obstacle][1] * rect_x, self._v_step)
+
+        obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
+
+        return obstacle_rect, [y, y + rect_y]
+
+
+# Helper functions
+def remove_range(start: int, stop: int, lst: np.array) -> np.array:
+    """Removes elements from the list that satisfy start <= element <= stop"""
+    i = 0
+    while i < len(lst):
+        if start <= lst[i] <= stop:
+            lst = np.delete(lst, i)
+            i -= 1
+        i += 1
+
+    return lst
+
+
+def len_largest_interval(lst: np.array) -> int:
+    """Return the continuous interval(increment of 1) of greatest length from a
+    given list"""
+    counter = 1
+    max_len = 0
+
+    for i in range(len(lst) - 1):
+        if lst[i+1] - lst[i] == 1:
+            counter += 1
+        else:
+            if counter > max_len:
+                max_len = counter
+            counter = 1
+
+    return max_len
 
 
 
