@@ -68,6 +68,9 @@ class GameMap:
     def get_object_types(self) -> Dict[str, Any]:
         return self._object_type
 
+    def get_step(self) -> Tuple[int, int]:
+        return self._h_step, self._v_step
+
     def get_difficulty(self) -> int:
         """Return the difficulty of this map"""
         return self._difficulty

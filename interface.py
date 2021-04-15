@@ -36,8 +36,10 @@ def meet_treasure(game_map: GameMap, cur_pos: Tuple[int, int]) -> bool:
         return True
     return False
 
+
 def meet_fragment(game_map: GameMap, step: int) -> bool:
     """Return whether the player has met a key fragment with current movement."""
+
 
 def get_possible_movement(game_map: GameMap, h_step: int, v_step: int) -> List[str]:
     """Calculate possible movement the player can make based on
@@ -47,9 +49,11 @@ def get_possible_movement(game_map: GameMap, h_step: int, v_step: int) -> List[s
     for move in movements:
         next_pos = Game.path.next_pos(move, h_step, v_step)
         check = []
-        for obstacle in game_map.get_obstacles():
-            if not any([obstacle[0].collidepoint(next_pos)]):
-                possible_movements.append(move)
+        obstacle_list = game_map.get_obstacles()[0]
+        next_rect = rect after move (movement)
+        if next_rect(movement).collidelistall(obstacle_list) == -1:
+            possible_movements.append(movement)
+
     return possible_movements
 
 
