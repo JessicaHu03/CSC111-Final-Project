@@ -106,8 +106,8 @@ class GameMap:
         obstacle_info = []
 
         while col_count < col_num:
-            print("Generating obstacles on column:" + str(col_count), end='\r')
-            time.sleep(0.05)
+            # print("Generating obstacles on column:" + str(col_count), end='\r')
+            # time.sleep(0.05)
 
             obstacle = random.choice(['rock', 'river'])
 
