@@ -3,7 +3,7 @@ This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
 from typing import Tuple, Any, Dict, List, Union
-from pygame import THECOLORS
+from pygame.color import THECOLORS
 import pygame as pg
 import numpy as np
 import random
@@ -57,6 +57,17 @@ class GameMap:
         """Return the generated obstacles of this map"""
         return self._obstacles
 
+    def get_fragments(self) -> List[Tuple[pg.Rect, str]]:
+        """Return the generated fragments of this map"""
+        return self._fragments
+
+    def get_treasures(self) -> List[Tuple[pg.Rect, str]]:
+        """Return the generated treasures of this map"""
+        return self._treasures
+
+    def get_object_types(self) -> Dict[str, Any]:
+        return self._object_type
+
     def get_difficulty(self) -> int:
         """Return the difficulty of this map"""
         return self._difficulty
@@ -93,7 +104,7 @@ class GameMap:
 
         while col_count < col_num:
             print("Generating obstacles on column:" + str(col_count), end='\r')
-            time.sleep(0.1)
+            time.sleep(0.05)
 
             obstacle = random.choice(['rock', 'river'])
 
@@ -123,6 +134,7 @@ class GameMap:
         col_width = (6 - self._difficulty) * self._h_step * 2
         list_obstacles = [o[0] for o in self._obstacles]
         list_fragments = []
+        list_treasures = []
         fragments = []
         treasures = []
         frag_count = 0
@@ -141,11 +153,12 @@ class GameMap:
             fragment_rect = pg.Rect(x, y, rect_x, rect_y)
 
             if fragment_rect.collidelist(list_obstacles) == -1:
-                list_fragments.append(fragment_rect)
-                fragments.append((fragment_rect, 'fragment'))
-                frag_count += 1
+                if fragment_rect.collidelist(list_fragments) == -1:
+                    list_fragments.append(fragment_rect)
+                    fragments.append((fragment_rect, 'fragment'))
+                    frag_count += 1
 
-        while treasure_count <= num_treasures:
+        while treasure_count < num_treasures:
             x = (col_width + 2 * self._h_step) +\
                 random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 4)) * self._h_step
             y = random.randint(2, self._div - 2) * self._v_step
@@ -155,9 +168,12 @@ class GameMap:
 
             treasure_rect = pg.Rect(x, y, rect_x, rect_y)
 
-            if treasure_rect.collidelist(list_obstacles) == -1 and treasure_rect.collidelist(list_fragments) == -1:
-                treasures.append((treasure_rect, 'treasure'))
-                treasure_count += 1
+            if treasure_rect.collidelist(list_obstacles) == -1:
+                if treasure_rect.collidelist(list_fragments) == -1:
+                    if treasure_rect.collidelist(list_treasures) == -1:
+                        list_treasures.append(treasure_rect)
+                        treasures.append((treasure_rect, 'treasure'))
+                        treasure_count += 1
 
         return fragments, treasures
 
