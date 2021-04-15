@@ -91,24 +91,18 @@ def run_game() -> None:
             if event.type in possible_mov:
                 if event.type == pg.K_LEFT:
                     new_pos = (cur_pos[0] - h_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_RIGHT:
                     new_pos = (cur_pos[0] + h_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_UP:
                     new_pos = (cur_pos[0] - v_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_DOWN:
                     new_pos = (cur_pos[0] + v_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 Game.path.update_path(new_pos)
                 Game.player.update_pos(new_pos)
-
-
 
         for o in Game.obstacles:
             pg.draw.rect(screen, object_types[o[1]][0], o[0])
@@ -116,8 +110,6 @@ def run_game() -> None:
             pg.draw.rect(screen, object_types[t[1]][0], t[0])
         for f in Game.fragments:
             pg.draw.rect(screen, object_types[f[1]][0], f[0])
-
-        Game.path.update_path()
 
         pg.display.flip()
 
