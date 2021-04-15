@@ -7,11 +7,11 @@ import pygame as pg
 from pygame.colordict import THECOLORS
 from map import GameMap
 from player import Player
-from path import Path
+from path import Path, Graph
 from typing import Tuple, Any, List
 from game import Game
 
-GRID_SIZE: 40
+GRID_SIZE = 40
 
 
 def draw_grid(screen: pg.Surface) -> None:
@@ -19,7 +19,7 @@ def draw_grid(screen: pg.Surface) -> None:
 
     The drawn grid has GRID_SIZE columns and rows.
     """
-    color = THECOLORS['grey']
+    color = (0, 0, 0)
     width, height = screen.get_size()
 
     for col in range(1, GRID_SIZE):
@@ -47,26 +47,29 @@ def run_game(game: Game) -> None:
     """Run game"""
     pg.display.set_caption("Treasure Hunt game!")
     screen = pg.display.set_mode((800, 800))
-    screen.fill((191, 192, 150))
     exit_game = False
     pg.init()
+    screen.fill((191, 192, 150))
+    draw_grid(screen)
 
     pg.font.init()
     font1 = pg.font.SysFont('Comic Sans MS', 30)
     not_enough_fragments = 'You still need more fragments to open this treasure!'
 
-    for o in game.obstacles:
-        pg.draw.rect(screen, game.game_map[o[1]][0], o[0])
-    for t in game.treasures:
-        pg.draw.rect(screen, game.game_map[t[1]][0], t[0])
-    for f in game.fragments:
-        pg.draw.rect(screen, game.game_map[f[1]][0], f[0])
+    h_step, v_step = game.game_map.get_step()
+    obstacle_list = [x[0] for x in game.game_map.get_obstacles()]
+    treasure_list = [x[0] for x in game.game_map.get_treasures()]
+    fragment_list = [x[0] for x in game.game_map.get_fragments()]
+
+    object_type = game.game_map.get_object_types()
+    for o in game.game_map.get_obstacles():
+        pg.draw.rect(screen, object_type[o[1]][0], o[0])
+    for t in game.game_map.get_treasures():
+        pg.draw.rect(screen, object_type[t[1]][0], t[0])
+    for f in game.game_map.get_fragments():
+        pg.draw.rect(screen, object_type[f[1]][0], f[0])
 
     cur_pos = game.player.get_pos()
-    h_step, v_step = game.map.get_step()
-    obstacle_list = [x[0] for x in game.map.get_obstacles()]
-    treasure_list = [x[0] for x in game.map.get_treasures()]
-    fragment_list = [x[0] for x in game.map.get_fragments()]
     possible_mov = []
 
     possible_next_pos = {'left': (cur_pos[0] - h_step - 4, cur_pos[1] - 4),
@@ -80,15 +83,14 @@ def run_game(game: Game) -> None:
         if next_rect.collidelistall(obstacle_list) == -1:
             possible_mov.append(move)
 
-    rect_pos = (cur_pos[0] - 4, cur_pos - 4)
+    rect_pos = (cur_pos[0] - 4, cur_pos[1] - 4)
 
     player_rect = pg.Rect(rect_pos, (8, 8))
-    pg.draw.rect(game.map, (154, 167, 177), player_rect)
+    pg.draw.rect(screen, (154, 167, 177), player_rect)
     new_pos = []
 
     while not exit_game:
         for event in pg.event.get():
-            draw_grid(screen)
             if event.type == pg.QUIT:
                 exit_game = True
             if event.type in possible_mov:
@@ -108,9 +110,9 @@ def run_game(game: Game) -> None:
                 game.player.update_pos(new_pos)
 
                 # if we meet a treasure
-                if game.player.collidelist(treasure_list):
+                if player_rect.collidelist(treasure_list):
                     # if we have more than 3 fragments when meet a treasure
-                    if game.player.fragment >= 3:
+                    if game.player.backpack['fragments'] >= 3:
                         game.player.update_backpack('treasures', 1)
                         game.player.update_backpack('fragments', -3)
                     # if we don't have enough fragments when meet a treasure
@@ -118,7 +120,7 @@ def run_game(game: Game) -> None:
                         text = font1.render(not_enough_fragments, False, (0, 0, 0))
                         screen.blit(text, (400, 200))
                 # if we meet a fragment
-                if game.player.collidelist(fragment_list):
+                if player_rect.collidelist(fragment_list):
                     game.player.update_backpack('fragments', 1)
 
         pg.display.flip()

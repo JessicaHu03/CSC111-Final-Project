@@ -5,6 +5,7 @@ from path import Path
 
 
 class Game:
+    """Game class"""
     path: Path
     player: Player
     game_map: GameMap
