@@ -155,18 +155,6 @@ class Path:
 
         self._graph.add_edge(self.current_pos(), new_pos)
 
-    def get_possible_movement(self, game_map: GameMap, step: int) -> List[str]:
-        """Calculate possible movement the player can make based on
-        current position in the given game map."""
-        movements = ['right', 'left', 'up', 'down']
-        possible_movements = []
-        for move in movements:
-            next_pos = self.next_pos(move, step)
-            for obstacle in game_map.get_obstacles():
-                if not any([obstacle[0].collidepoint(next_pos)]):
-                    possible_movements.append(move)
-
-        return possible_movements
 
 
 
