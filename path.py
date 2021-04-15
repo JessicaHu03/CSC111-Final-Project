@@ -162,9 +162,8 @@ class Path:
         possible_movements = []
         for move in movements:
             next_pos = self.next_pos(move, step)
-            check = []
             for obstacle in game_map.get_obstacles():
-                if not any[obstacle[0].collidepoint(next_pos)]:
+                if not any([obstacle[0].collidepoint(next_pos)]):
                     possible_movements.append(move)
 
         return possible_movements
