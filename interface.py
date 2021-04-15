@@ -49,10 +49,7 @@ def get_possible_movement(game_map: GameMap, h_step: int, v_step: int) -> List[s
     for move in movements:
         next_pos = Game.path.next_pos(move, h_step, v_step)
         check = []
-        obstacle_list = game_map.get_obstacles()[0]
-        next_rect = rect after move (movement)
-        if next_rect(movement).collidelistall(obstacle_list) == -1:
-            possible_movements.append(movement)
+
 
     return possible_movements
 
@@ -65,14 +62,26 @@ def run_game() -> None:
     exit_game = False
     pg.init()
 
-    user_input = pg.key.get_pressed()
     cur_pos = Game.player.get_pos()
-    rect_pos = (cur_pos[0] - 4, cur_pos - 4)
     h_step, v_step = Game.map.get_step()
+    possible_mov = []
+
+    possible_next_pos = {'left': (cur_pos[0] - h_step - 4, cur_pos[1] - 4),
+                         'right': (cur_pos[0] + h_step - 4, cur_pos[1] - 4),
+                         'up': (cur_pos[0] - v_step - 4, cur_pos[1] - 4),
+                         'down': (cur_pos[0] + v_step - 4, cur_pos[1] - 4)}
+    obstacle_list = Game.map.get_obstacles()[0]
+    for move in possible_next_pos:
+        next_pos = possible_next_pos[move]
+        next_rect = pg.Rect(next_pos, (8, 8))
+        if next_rect.collidelistall(obstacle_list) == -1:
+            possible_mov.append(move)
+
+    rect_pos = (cur_pos[0] - 4, cur_pos - 4)
+
     player_rect = pg.Rect(rect_pos, (8, 8))
     pg.draw.rect(Game.map, (154, 167, 177), player_rect)
     new_pos = []
-    possible_mov = get_possible_movement(Game.map, v_step)
 
     while not exit_game:
         for event in pg.event.get():
