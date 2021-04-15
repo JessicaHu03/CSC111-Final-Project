@@ -3,7 +3,7 @@ a number of game runs with a fixed map.
 """
 
 from __future__ import annotations
-from typing import Any, Tuple, List
+from typing import Tuple
 import operator
 from map import GameMap
 from player import Player
@@ -97,9 +97,11 @@ class Graph:
             raise ValueError
 
     def get_vertex(self, pos: Tuple[int, int]) -> _Vertex:
+        """Return the vertex at the input position"""
         return self._vertices[pos]
 
     def get_vertices(self) -> dict[Tuple[int, int], _Vertex]:
+        """Return _vertices"""
         return self._vertices
 
 
@@ -120,6 +122,7 @@ class Path:
         self._game_map = game_map
 
     def get_graph(self) -> Graph:
+        """Return the Graph"""
         return self._graph
 
     def current_pos(self) -> Tuple[int, int]:
@@ -144,17 +147,14 @@ class Path:
 
         return next_pos
 
-    def update_path(self, new_pos:Tuple[int, int]) -> None:
+    def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)
 
         This only happens for possible movements, after which is checked
         in advance
         """
+        self.move_count += 1
         if new_pos not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
 
         self._graph.add_edge(self.current_pos(), new_pos)
-
-
-
-

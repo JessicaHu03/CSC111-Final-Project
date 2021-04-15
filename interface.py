@@ -1,5 +1,5 @@
 """
-This is the main game file contains the relevant execution of a PyGame
+This is the main game file contains the relevant execution of a Pygame
 interface for the game.
 """
 
@@ -30,49 +30,61 @@ def draw_grid(screen: pg.Surface) -> None:
         y = row * (height // GRID_SIZE)
         pg.draw.line(screen, color, (0, y), (width, y))
 
-def meet_treasure(game_map: GameMap, cur_pos: Tuple[int, int]) -> bool:
-    """Return whether the player has met a treasure with current movement."""
-    if self._player.collidelist(game_map.get_treasures()):
-        return True
-    return False
+
+#
+# def meet_treasure(game_map: gameMap, cur_pos: Tuple[int, int]) -> bool:
+#     """Return whether the player has met a treasure with current movement."""
+#     if _player.collidelist(game_map.get_treasures()):
+#         return True
+#     return False
+# 
+# 
+# def meet_fragment(game_map: gameMap, step: int) -> bool:
+#     """Return whether the player has met a key fragment with current movement."""
 
 
-def meet_fragment(game_map: GameMap, step: int) -> bool:
-    """Return whether the player has met a key fragment with current movement."""
-
-
-def get_possible_movement(game_map: GameMap, h_step: int, v_step: int) -> List[str]:
-    """Calculate possible movement the player can make based on
-    current position in the given game map."""
-    movements = ['right', 'left', 'up', 'down']
-    possible_movements = []
-    for move in movements:
-        next_pos = Game.path.next_pos(move, h_step, v_step)
-        check = []
-        obstacle_list = game_map.get_obstacles()[0]
-        next_rect = rect after move (movement)
-        if next_rect(movement).collidelistall(obstacle_list) == -1:
-            possible_movements.append(movement)
-
-    return possible_movements
-
-
-def run_game() -> None:
-    # TODO: Finish this module
-    pg.display.set_caption("Treasure Hunt Game!")
+def run_game(game: Game) -> None:
+    """Run game"""
+    pg.display.set_caption("Treasure Hunt game!")
     screen = pg.display.set_mode((800, 800))
     screen.fill((191, 192, 150))
     exit_game = False
     pg.init()
 
-    user_input = pg.key.get_pressed()
-    cur_pos = Game.player.get_pos()
+    pg.font.init()
+    font1 = pg.font.SysFont('Comic Sans MS', 30)
+    not_enough_fragments = 'You still need more fragments to open this treasure!'
+
+    for o in game.obstacles:
+        pg.draw.rect(screen, game.game_map[o[1]][0], o[0])
+    for t in game.treasures:
+        pg.draw.rect(screen, game.game_map[t[1]][0], t[0])
+    for f in game.fragments:
+        pg.draw.rect(screen, game.game_map[f[1]][0], f[0])
+
+    cur_pos = game.player.get_pos()
+    h_step, v_step = game.map.get_step()
+    obstacle_list = [x[0] for x in game.map.get_obstacles()]
+    treasure_list = [x[0] for x in game.map.get_treasures()]
+    fragment_list = [x[0] for x in game.map.get_fragments()]
+    possible_mov = []
+
+    possible_next_pos = {'left': (cur_pos[0] - h_step - 4, cur_pos[1] - 4),
+                         'right': (cur_pos[0] + h_step - 4, cur_pos[1] - 4),
+                         'up': (cur_pos[0] - v_step - 4, cur_pos[1] - 4),
+                         'down': (cur_pos[0] + v_step - 4, cur_pos[1] - 4)}
+
+    for move in possible_next_pos:
+        next_pos = possible_next_pos[move]
+        next_rect = pg.Rect(next_pos, (8, 8))
+        if next_rect.collidelistall(obstacle_list) == -1:
+            possible_mov.append(move)
+
     rect_pos = (cur_pos[0] - 4, cur_pos - 4)
-    h_step, v_step = Game.map.get_step()
+
     player_rect = pg.Rect(rect_pos, (8, 8))
-    pg.draw.rect(Game.map, (154, 167, 177), player_rect)
+    pg.draw.rect(game.map, (154, 167, 177), player_rect)
     new_pos = []
-    possible_mov = get_possible_movement(Game.map, v_step)
 
     while not exit_game:
         for event in pg.event.get():
@@ -82,37 +94,33 @@ def run_game() -> None:
             if event.type in possible_mov:
                 if event.type == pg.K_LEFT:
                     new_pos = (cur_pos[0] - h_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_RIGHT:
                     new_pos = (cur_pos[0] + h_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_UP:
                     new_pos = (cur_pos[0] - v_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
                 if event.type == pg.K_DOWN:
                     new_pos = (cur_pos[0] + v_step, cur_pos[1])
-                    Game.player.update_pos(new_pos)
                     player_rect.move(new_pos)
-                Game.path.update_path(new_pos)
-                Game.player.update_pos(new_pos)
+                game.path.update_path(new_pos)
+                game.player.update_pos(new_pos)
 
-
-
-        for o in Game.obstacles:
-            pg.draw.rect(screen, object_types[o[1]][0], o[0])
-        for t in Game.treasures:
-            pg.draw.rect(screen, object_types[t[1]][0], t[0])
-        for f in Game.fragments:
-            pg.draw.rect(screen, object_types[f[1]][0], f[0])
-
-        Game.path.update_path()
+                # if we meet a treasure
+                if game.player.collidelist(treasure_list):
+                    # if we have more than 3 fragments when meet a treasure
+                    if game.player.fragment >= 3:
+                        game.player.update_backpack('treasures', 1)
+                        game.player.update_backpack('fragments', -3)
+                    # if we don't have enough fragments when meet a treasure
+                    else:
+                        text = font1.render(not_enough_fragments, False, (0, 0, 0))
+                        screen.blit(text, (400, 200))
+                # if we meet a fragment
+                if game.player.collidelist(fragment_list):
+                    game.player.update_backpack('fragments', 1)
 
         pg.display.flip()
 
     pg.quit()
-
-
-

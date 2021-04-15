@@ -13,8 +13,8 @@ class Player:
     user_id : string
         Represents the user id of the player.
         This can be used to identify different players on the interface.
-    score : int
-        Keep track of current number of treasure the player has found.
+    backpack : dict
+        Keep track of current number of treasure and fragments the player has found.
     _position : Tuple[int, int, int]
         Current position of a player on the map.
         Represented by a tuple of integers consisting of the (x, y)
@@ -24,7 +24,7 @@ class Player:
         Represented by an integer indicating the radius of vision
     """
     user_id: str
-    score: int
+    backpack: dict
     _position: Tuple[int, int]
     _vision_field: int
 
@@ -37,7 +37,7 @@ class Player:
         self.user_id = user_id
         self._position = initial_pos
         self._vision_field = vision_field
-        self.score = 0
+        self.backpack = {'treasure': 0, 'fragments': 0}
 
     def get_pos(self) -> Tuple[int, int]:
         """Returns the current position of the player."""
@@ -48,10 +48,10 @@ class Player:
         coordinates"""
         self._position = new_pos
 
-    def update_score(self, change: int) -> None:
-        """Updates the current score of the indicated type(keys, fragments...)
+    def update_backpack(self, object_type: str, change: int) -> None:
+        """Updates the current backpack of the indicated type(keys, fragments...)
         with the given value of change"""
-        self.score += change
+        self.backpack[object_type] += change
 
     def set_vision_radius(self, radius: int) -> None:
         """Updates the vision field radius (this is for testing purposes or for
