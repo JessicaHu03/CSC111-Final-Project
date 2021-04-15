@@ -4,7 +4,7 @@ from map import GameMap
 from path import Path
 
 
-class Game():
+class Game:
     path: Path
     player: Player
     game_map: GameMap
