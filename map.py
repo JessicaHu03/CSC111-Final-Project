@@ -13,9 +13,8 @@ import os
 class GameMap:
     """This represents a game map with the indicated obstacles and "difficulty" of the game.
 
-    The difficulty attribute indicates how much the obstacles will occupy the map, or in other
-    words how much of the map is not available for the path, and also how many treasures are
-    needed to be found.
+    The difficulty attribute indicates the number of obstacles that will occupy the map,
+    and how many fragments and treasures are needed to be found.
     """
     _width: int
     _height: int
@@ -66,9 +65,11 @@ class GameMap:
         return self._treasures
 
     def get_object_types(self) -> Dict[str, Any]:
+        """Returns the relevant information for each type of game object"""
         return self._object_type
 
     def get_object_info(self) -> Tuple[Any, ...]:
+        """Returns the rect object information for each type"""
         return self._obstacle_info, self._fragment_info, self._treasure_info
 
     def get_step(self) -> Tuple[int, int]:
@@ -107,8 +108,8 @@ class GameMap:
     def generate_obstacles(self) -> None:
         """Generates the obstacles on the map with the required obstacle types.
 
-        Calling this function will not update the obstacles attribute of the map.
-        As it is only meant to be called in the initialization of the game map.
+        Calling this function updates the obstacles attribute of the map. This is only
+        meant to be called in the initialization of the game map with autogen=True.
         """
         col_width = (6 - self._difficulty) * self._h_step * 2
         col_num = int(self._width / col_width) + 1
@@ -127,19 +128,28 @@ class GameMap:
 
             obstacle_heights.append((rect_info[1], rect_info[3]))
 
+            # Generates a new list from 0 to height (0, 1, 2, 3,...,height).
             y = np.arange(0, self._height)
+            # For each rectangle generated, its height range is removed from the list.
+            # e.g. Rectangle that occupies from y = 200 to y = 400 will remove that range,
+            # which then becomes (0, 1, 2,...,199, 401, 402,...,height)
             for x in obstacle_heights:
                 remove_range(x[0], x[1], y)
 
+            # Checks whether total number of obstacles is reached either by game difficulty settings
+            # or if there is no space left for the player to go through if the rectangle is added.
             if len(obstacle_col) >= self._difficulty * 2\
                     or len(y) <= (6 - self._difficulty) * self._v_step:
+                # Adds the column of obstacles to the list of all obstacles
                 obstacle_info.extend(obstacle_col_info)
                 obstacles.extend(obstacle_col)
                 col_count += 1
+                # Resets the column
                 obstacle_col.clear()
                 obstacle_col_info.clear()
                 obstacle_heights.clear()
             else:
+                # If above conditions are not met, add a new obstacle to the column
                 obstacle_col_info.append((rect_info, obstacle))
                 obstacle_col.append((rect_gen, obstacle))
 
@@ -147,7 +157,11 @@ class GameMap:
         self._obstacles = obstacles
 
     def generate_treasures(self):
-        """Generates treasure objects (fragments and a treasure chest)"""
+        """Generates treasure objects (fragments and treasure chests)
+
+        Note that contrary to obstacle generation, where each rect is generated
+        in columns, this is random, and takes range for almost the entire map.
+        """
         num_fragments = self._difficulty * 3
         num_treasures = self._difficulty
         col_width = (6 - self._difficulty) * self._h_step * 2
@@ -162,7 +176,9 @@ class GameMap:
         treasure_count = 0
 
         while frag_count < num_fragments:
-            """Generating key fragments"""
+            # Generating Key fragments
+            # All object generations start at a certain point a few steps from the left
+
             # All this does is putting the fragments in the middle of the grid lines
             x = int((col_width + 2 * self._h_step + self._h_step / 2) +
                     random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 2))
@@ -172,8 +188,10 @@ class GameMap:
             rect_x = int(self._h_step)
             rect_y = int(rect_x * self._object_type['fragment'][1])
 
+            # Generate Rectangle object from given coordinates and size
             fragment_rect = pg.Rect(x, y, rect_x, rect_y)
 
+            # Check collision with existing game objects
             if fragment_rect.collidelist(list_obstacles) == -1:
                 if fragment_rect.collidelist(list_fragments) == -1:
                     list_fragments.append(fragment_rect)
@@ -190,8 +208,10 @@ class GameMap:
             rect_x = int(self._h_step * 2)
             rect_y = int(rect_x * self._object_type['treasure'][1])
 
+            # Generate Rectangle object from given coordinates and size
             treasure_rect = pg.Rect(x, y, rect_x, rect_y)
 
+            # Check collision with existing game objects
             if treasure_rect.collidelist(list_obstacles) == -1:
                 if treasure_rect.collidelist(list_fragments) == -1:
                     if treasure_rect.collidelist(list_treasures) == -1:
@@ -204,7 +224,7 @@ class GameMap:
         self._fragment_info, self._treasure_info = fragment_info, treasure_info
 
     def _generate_helper(self, col_count: int, obstacle: str) -> Tuple[pg.Rect, Tuple[int, ...]]:
-        """Generates a single obstacle object in the given column"""
+        """Generates a single obstacle object in the given column. This is for obstacles only"""
         col_width = (6 - self._difficulty) * self._h_step * 2
 
         x = col_count * col_width + 2 * self._h_step
@@ -213,6 +233,7 @@ class GameMap:
         rect_x = col_width - self._h_step * 2
         rect_y = random.randint(1, self._object_type[obstacle][1]) * rect_x
 
+        # Generate Rectangle object from given coordinates and size
         obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
 
         return obstacle_rect, (x, y, rect_x, rect_y)

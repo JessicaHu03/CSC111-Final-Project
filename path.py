@@ -110,6 +110,8 @@ class Path:
     _graph: Graph
     _player: Player
     move_count: int
+    # Note that a path object doesn't actually need the game_map for any of its functions
+    # Instead, it is just to indicate which map this path is for
     _game_map: GameMap
 
     def __init__(self, game_map: GameMap,

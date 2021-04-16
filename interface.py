@@ -105,7 +105,7 @@ class GameDisplay:
                 game_exit = True
 
     def run_game(self, game: Game) -> None:
-        """Run game"""
+        """Runs the game"""
 
         # Defines player movement step size
         h_step, v_step = game.game_map.get_step()
