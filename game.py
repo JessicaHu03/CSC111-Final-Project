@@ -14,3 +14,7 @@ class Game:
         self.path = path
         self.player = player
         self.game_map = game_map
+        self.show_all = False
+        
+    def set_show(self, value: bool):
+        self.show_all = value
