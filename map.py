@@ -2,10 +2,12 @@
 This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
-from typing import Tuple, Any, Dict, List
+from typing import Tuple, Any, Dict, List, Optional
 import pygame as pg
 import numpy as np
+import pandas as pd
 import random
+import os
 
 
 class GameMap:
@@ -24,12 +26,12 @@ class GameMap:
     _obstacles: List[Tuple[pg.Rect, str]]
     _fragments: List[pg.Rect]
     _treasures: List[pg.Rect]
-    _obstacle_info: List[Tuple[int, ...]]
+    _obstacle_info: List[Tuple[Tuple[int, ...], str]]
     _fragment_info: List[Tuple[int, ...]]
     _treasure_info: List[Tuple[int, ...]]
     _object_type: Dict[str, Any]
 
-    def __init__(self, difficulty: int, screen_size: Tuple[int, int], div: int, autogen: bool):
+    def __init__(self, screen_size: Tuple[int, int], div: int, autogen: bool, difficulty: Optional[int] = 4):
         """Initializes GameMap object with the given game difficulty, movement step size,
         and window size"""
         self._width = screen_size[0]
@@ -44,6 +46,9 @@ class GameMap:
             'fragment': ((193, 44, 31), 1),
             'treasure': ((248, 188, 49), 1/2)
         }
+        self._obstacles = list()
+        self._treasures = list()
+        self._fragments = list()
         if autogen:
             self.generate_obstacles()
             self.generate_treasures()
@@ -63,6 +68,9 @@ class GameMap:
     def get_object_types(self) -> Dict[str, Any]:
         return self._object_type
 
+    def get_object_info(self) -> Tuple[Any, ...]:
+        return self._obstacle_info, self._fragment_info, self._treasure_info
+
     def get_step(self) -> Tuple[int, int]:
         return self._h_step, self._v_step
 
@@ -73,6 +81,28 @@ class GameMap:
     def get_screen_size(self) -> Tuple[int, int]:
         """Return the width and height of the screen"""
         return self._width, self._height
+
+    def generate_objects_from_info(self) -> None:
+        """This is for using the information read from a map file to generate relevant
+        game objects. However it uses its own attributes(e.g. self._obstacle_info) as
+        that's where the information is saved to"""
+        # Iterates through the obstacle object information to generate
+        # new obstacle rectangles with their relevant type assigned.
+        for rect, types in self.get_object_info()[0]:
+            obstacle_rect = pg.Rect(rect)
+            self._obstacles.append((obstacle_rect, types))
+
+        # Iterates through the fragment objects information to generate
+        # new fragment rectangles.
+        for rect in self.get_object_info()[1]:
+            fragment_rect = pg.Rect(rect)
+            self._fragments.append(fragment_rect)
+
+        # Iterates through the treasure objects information to generate
+        # new treasure rectangles.
+        for rect in self.get_object_info()[2]:
+            treasure_rect = pg.Rect(rect)
+            self._treasures.append(treasure_rect)
 
     def generate_obstacles(self) -> None:
         """Generates the obstacles on the map with the required obstacle types.
@@ -110,7 +140,7 @@ class GameMap:
                 obstacle_col_info.clear()
                 obstacle_heights.clear()
             else:
-                obstacle_col_info.append(rect_info)
+                obstacle_col_info.append((rect_info, obstacle))
                 obstacle_col.append((rect_gen, obstacle))
 
         self._obstacle_info = obstacle_info
@@ -186,6 +216,66 @@ class GameMap:
         obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
 
         return obstacle_rect, (x, y, rect_x, rect_y)
+
+    def save_map(self) -> None:
+        """Save the current map information to a new file under directory 'maps', with name map[num].csv"""
+        # Returns number of existing maps from directory
+        map_num = len([m for m in os.listdir('maps/')])
+
+        # Retrieves specific object information, save to dataframe
+        obstacle_info = pd.DataFrame({'obstacle': [x[0] for x in self.get_object_info()[0]]})
+        obstacle_type = pd.DataFrame({'obstacle_type': [x[1] for x in self.get_object_info()[0]]})
+        fragment_info = pd.DataFrame({'fragment': self.get_object_info()[1]})
+        treasure_info = pd.DataFrame({'treasure': self.get_object_info()[2]})
+
+        # Retrieves difficulty setting
+        settings_info = pd.DataFrame({'difficulty': self.get_difficulty()}, index=[0])
+
+        # Concatenate all information to a single dataframe. This may be bad practice, for that
+        # the elements from one row aren't correlated, and there is a different number of observations
+        # per variable. Using Pandas here is just for code cleanliness and computational simplicity.
+        object_info = pd.concat([obstacle_info, obstacle_type, treasure_info, fragment_info, settings_info],
+                                axis=1, ignore_index=False)
+
+        # Sets new map name. This is given by 'maps' + the map index.
+        map_name = 'map{}.csv'.format(map_num + 1)
+        # Saves map file to directory
+        object_info.to_csv(os.path.join(r'maps\\', map_name), index=False)
+
+    def read_map(self, map_file: str):
+        """Reads a game map from file, retrieving all relevant information required
+        to generate a map"""
+        # Reading game_map type file
+        df = pd.read_csv(map_file, index_col=False)
+
+        # Retrieve game objects and settings for map, indexing by column name
+        # The concatenation of different length DataFrames result in NA values,
+        # thus they need to be removed.
+        obstacles = df['obstacle'].dropna().tolist()
+        obstacle_type = df['obstacle_type'].dropna().tolist()
+        treasures = df['treasure'].dropna().tolist()
+        fragments = df['fragment'].dropna().tolist()
+        difficulty = int(df['difficulty'][0])
+
+        # Each value of the DataFrame is of type string, except for the difficulty.
+        # Thus, by evaluating each returns the tuple objects.
+        obstacle_info = [eval(rect) for rect in obstacles]
+        treasure_info = [eval(rect) for rect in treasures]
+        fragment_info = [eval(rect) for rect in fragments]
+
+        # Concatenate the obstacle rect to their relevant type
+        assert len(obstacle_info) == len(obstacle_type)
+        obstacle_concat = []
+        for i in range(len(obstacle_info)):
+            obstacle_concat.append((obstacle_info[i], obstacle_type[i]))
+
+        # Save the game objects and settings to the current game map
+        obstacle_info_concat = obstacle_concat
+        self._obstacle_info = obstacle_info_concat
+        self._treasure_info = treasure_info
+        self._fragment_info = fragment_info
+        self._difficulty = difficulty
+        self.generate_objects_from_info()
 
 
 # Helper functions
