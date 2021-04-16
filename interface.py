@@ -5,13 +5,13 @@ interface for the game.
 
 import pygame as pg
 from pygame.locals import *
-from pygame.colordict import THECOLORS
 from map import GameMap
 from player import Player
 from path import Path, Graph
-from typing import Tuple, Any, List
+from typing import Tuple
 from game import Game
 import time
+import os
 
 
 class GameDisplay:
@@ -230,12 +230,36 @@ def next_pos(cur_pos: Tuple[int, int], move: str, h_step, v_step) -> Tuple[int, 
 
 
 def test() -> None:
+    """Tests all relevant functions from each modules"""
+    # TODO implement this to the Game Class
+
+    # Initializes Game Display
     display = GameDisplay((800, 800))
+
+    # Initializes empty graph
     graph = Graph()
+    # Initializes player with default position
     ply = Player('Test', (int(20 - 8 / 2), int(400 - 8 / 2)), 10)
-    map1 = GameMap(4, (800, 800), 40, True)
+
+    # New GameMap object with generated game objects
+    map1 = GameMap((800, 800), 40, True)
+    # Save map to file
+    map1.save_map()
+    print("Saving map")
+    time.sleep(2)
+    # Retrieve the name of the map that was just saved
+    map_num = len([m for m in os.listdir('maps/')])
+    map_name = 'map{}.csv'.format(map_num)
+    map_path = os.path.join(r'maps\\', map_name)
+    # New GameMap object without any game objects: autogen = False
+    map2 = GameMap((800, 800), 40, False)
+    # Reads from the map that was just saved
+    map2.read_map(map_path)
+
+    # Assign map and player to the Path
     p = Path(map1, graph, ply)
-    game = Game(map1, p, ply)
+    # Initializes game
+    game = Game(map2, p, ply)
     display.run_game(game)
 
 

@@ -8,8 +8,8 @@ from player import Player
 
 pygame.init()
 screen = pygame.display.set_mode((600, 800))
-background = pygame.image.load('OIP.jpg').convert()
-start = pygame.image.load('start.jpg').convert()
+background = pygame.image.load('images/OIP.jpg').convert()
+start = pygame.image.load('images/start.jpg').convert()
 RUNNING = True
 score = 0
 pygame.display.set_caption('Treasure Hunt')
@@ -27,7 +27,7 @@ class Char(Player):
     """
     def __init__(self, user_id: str, initial_pos: Tuple[int, int], vision_field: int) -> None:
         super().__init__(user_id, initial_pos, vision_field)
-        self.image = pygame.image.load('char.jpg')
+        self.image = pygame.image.load('images/char.jpg')
         self.rect = self.image.get_rect()
         self.pos = initial_pos
 
@@ -51,7 +51,7 @@ class Char(Player):
 
     def meet_treasure(self, bool) -> None:
         if bool == True:
-            self.image = pygame.image.load('happy.jpg')
+            self.image = pygame.image.load('images/happy.jpg')
         else:
             return
         
@@ -61,7 +61,7 @@ class Treasure(pygame.sprite.Sprite):
     """
     def __init__(self) -> None:
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('treasure.jpg')
+        self.image = pygame.image.load('images/treasure.jpg')
         self.rect = self.image.get_rect()
         self.pos = treasure_pos
 
