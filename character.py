@@ -46,7 +46,7 @@ class Char(Player):
          - self.move_left is True or self.move_right is True
         """
         ...
-    def meet_obstacle(self) -> None:
+    def meet_obstacle(self, bool) -> None:
         ...
 
     def meet_treasure(self, bool) -> None:
