@@ -175,8 +175,8 @@ class GameDisplay:
             # Draws player rectangle object onto screen
             pg.draw.rect(self.screen, (255, 255, 255), player_rect)
 
-            # Draws all game objects onto screen
             if show_all:
+                # Draws all game objects onto screen if show_all is True
                 for o in obstacle_list_type:
                     pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
                 for treasure in treasure_list:
@@ -184,11 +184,11 @@ class GameDisplay:
                 for fragment in fragment_list:
                     pg.draw.rect(self.screen, (193, 44, 31), fragment)
             else:
-                vertices = game.path.get_graph().get_vertices().keys()
-                vision_pos = [eval(vertex) for vertex in vertices]
+                # Otherwise, utilizes vision field function
+                path_pos = game.path.all_pos()
 
                 vision_rect_size = (rect_size[0] + 2 * vision_radius, rect_size[1] + 2 * vision_radius)
-                vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in vision_pos]
+                vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in path_pos]
 
                 vision_rects = [pg.Rect(pos, vision_rect_size) for pos in vision_rect_pos]
 

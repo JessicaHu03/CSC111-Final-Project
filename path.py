@@ -112,6 +112,7 @@ class Path:
     # Note that a path object doesn't actually need the game_map for any of its functions
     # Instead, it is just to indicate which map this path is for
     _game_map: GameMap
+    _all_pos: List[Tuple[int, int]]
 
     def __init__(self, game_map: GameMap,
                  graph: Graph, player: Player) -> None:
@@ -121,6 +122,7 @@ class Path:
         self._graph = graph
         self._graph.add_vertex(self.current_pos())
         self._game_map = game_map
+        self._all_pos = []
 
     def get_graph(self) -> Graph:
         """Return the Graph"""
@@ -129,6 +131,10 @@ class Path:
     def current_pos(self) -> Tuple[int, int]:
         """Return current position in the path"""
         return self._player.get_pos()
+
+    def all_pos(self) -> List[Tuple[int, int]]:
+        """Return all the past positions of the player"""
+        return self._all_pos
 
     def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)
@@ -140,6 +146,7 @@ class Path:
 
         if new_pos not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
+            self._all_pos.append(new_pos)
 
         self._graph.add_edge(self.current_pos(), new_pos)
 
