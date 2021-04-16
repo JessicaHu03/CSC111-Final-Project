@@ -3,8 +3,7 @@ a number of game runs with a fixed map.
 """
 
 from __future__ import annotations
-from typing import Tuple
-import operator
+from typing import Tuple, List
 from map import GameMap
 from player import Player
 
@@ -139,8 +138,8 @@ class Path:
         """
         self.move_count += 1
 
-        exist = False
         if new_pos not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
 
         self._graph.add_edge(self.current_pos(), new_pos)
+

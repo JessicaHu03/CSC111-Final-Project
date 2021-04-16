@@ -46,9 +46,17 @@ class Player:
             self.backpack['treasures'] = 0
         self.backpack['fragments'] = 0
 
+    def get_vision_radius(self) -> int:
+        return self._vision_field
+
     def get_pos(self) -> Tuple[int, int]:
         """Returns the current position of the player."""
         return self._position
+
+    def set_vision_radius(self, radius: int) -> None:
+        """Updates the vision field radius (this is for testing purposes or for
+        certain additional feature)"""
+        self._vision_field = radius
 
     def update_pos(self, new_pos: Tuple[int, int]) -> None:
         """Updates the position of the player with the given change in the
@@ -60,7 +68,3 @@ class Player:
         with the given value of change"""
         self.backpack[object_type] += change
 
-    def set_vision_radius(self, radius: int) -> None:
-        """Updates the vision field radius (this is for testing purposes or for
-        certain additional feature)"""
-        self._vision_field = radius

@@ -115,6 +115,7 @@ class GameMap:
         col_num = int(self._width / col_width) + 1
         col_count = 1
         obstacles = []
+        obstacles_list = []
         obstacle_col = []
         obstacle_heights = []
         obstacle_col_info = []
@@ -150,8 +151,10 @@ class GameMap:
                 obstacle_heights.clear()
             else:
                 # If above conditions are not met, add a new obstacle to the column
-                obstacle_col_info.append((rect_info, obstacle))
-                obstacle_col.append((rect_gen, obstacle))
+                if rect_gen.collidelist(obstacles_list) == -1:
+                    obstacle_col_info.append((rect_info, obstacle))
+                    obstacle_col.append((rect_gen, obstacle))
+                    obstacles_list.append(rect_gen)
 
         self._obstacle_info = obstacle_info
         self._obstacles = obstacles

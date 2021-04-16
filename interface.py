@@ -130,10 +130,12 @@ class GameDisplay:
 
         rect_size = (8, 8)
         rect_pos = game.player.initial_pos
+        vision_radius = game.player.get_vision_radius()
         # This is for returning the player upon treasure collision with not enough fragments
         player_rect = pg.Rect(rect_pos, rect_size)
 
         # Game Loop
+        show_all = False
         exit_game = False
         while not exit_game:
             game.player.update_pos(rect_pos)
@@ -151,6 +153,7 @@ class GameDisplay:
             for event in pg.event.get():
                 if event.type == QUIT:
                     exit_game = True
+                    pg.quit()
 
                 if event.type == KEYDOWN:
                     # Assign rectangle movements according to key event if movement is valid
@@ -163,6 +166,9 @@ class GameDisplay:
 
                         game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
 
+                    if event.key == K_f:
+                        show_all = not show_all
+
             # Fills screen
             self.screen.fill((191, 192, 150))
 
@@ -170,12 +176,31 @@ class GameDisplay:
             pg.draw.rect(self.screen, (255, 255, 255), player_rect)
 
             # Draws all game objects onto screen
-            for o in obstacle_list_type:
-                pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
-            for treasure in treasure_list:
-                pg.draw.rect(self.screen, (248, 188, 49), treasure)
-            for fragment in fragment_list:
-                pg.draw.rect(self.screen, (193, 44, 31), fragment)
+            if show_all:
+                for o in obstacle_list_type:
+                    pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
+                for treasure in treasure_list:
+                    pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                for fragment in fragment_list:
+                    pg.draw.rect(self.screen, (193, 44, 31), fragment)
+            else:
+                vertices = game.path.get_graph().get_vertices().keys()
+                vision_pos = [eval(vertex) for vertex in vertices]
+
+                vision_rect_size = (rect_size[0] + 2 * vision_radius, rect_size[1] + 2 * vision_radius)
+                vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in vision_pos]
+
+                vision_rects = [pg.Rect(pos, vision_rect_size) for pos in vision_rect_pos]
+
+                for o in obstacle_list_type:
+                    if o[0].collidelist(vision_rects) != -1:
+                        pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
+                for treasure in treasure_list:
+                    if treasure.collidelist(vision_rects) != -1:
+                        pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                for fragment in fragment_list:
+                    if fragment.collidelist(vision_rects) != -1:
+                        pg.draw.rect(self.screen, (193, 44, 31), fragment)
 
             # Adds grid to the screen
             self.draw_grid(40)
@@ -231,14 +256,10 @@ def next_pos(cur_pos: Tuple[int, int], move: str, h_step, v_step) -> Tuple[int, 
 def test() -> None:
     """Tests all relevant functions from each modules"""
     # TODO implement this to the Game Class
-
-    # Initializes Game Display
-    display = GameDisplay((800, 800))
-
     # Initializes empty graph
     graph = Graph()
     # Initializes player with default position
-    ply = Player('Test', (int(20 - 8 / 2), int(400 - 8 / 2)), 10)
+    ply = Player('Test', (int(20 - 8 / 2), int(400 - 8 / 2)), 20)
 
     # New GameMap object with generated game objects
     map1 = GameMap((800, 800), 40, True)
@@ -259,4 +280,7 @@ def test() -> None:
     p = Path(map1, graph, ply)
     # Initializes game
     game = Game(map2, p, ply)
+
+    # Initializes Game Display
+    display = GameDisplay((800, 800))
     display.run_game(game)
