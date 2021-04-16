@@ -137,7 +137,6 @@ class GameDisplay:
         exit_game = False
         while not exit_game:
             game.player.update_pos(rect_pos)
-            cur_pos = rect_pos
 
             # Checks for possible movements given obstacles in the current map
             possible_movements = ['left', 'right', 'up', 'down']
@@ -261,12 +260,3 @@ def test() -> None:
     # Initializes game
     game = Game(map2, p, ply)
     display.run_game(game)
-
-
-
-
-
-
-
-
-
