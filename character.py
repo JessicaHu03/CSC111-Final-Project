@@ -46,7 +46,15 @@ class Char(Player):
          - self.move_left is True or self.move_right is True
         """
         ...
+    def meet_obstacle(self) -> None:
+        ...
 
+    def meet_treasure(self, bool) -> None:
+        if bool == True:
+            self.image = pygame.image.load('happy.jpg')
+        else:
+            return
+        
 class Treasure(pygame.sprite.Sprite):
     """
     the class of the treasures the hunter need to find
