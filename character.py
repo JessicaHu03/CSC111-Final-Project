@@ -46,15 +46,17 @@ class Char(Player):
          - self.move_left is True or self.move_right is True
         """
         ...
+
     def meet_obstacle(self, bool) -> None:
         ...
 
     def meet_treasure(self, bool) -> None:
-        if bool == True:
+        if bool:
             self.image = pygame.image.load('images/happy.jpg')
         else:
             return
-        
+
+
 class Treasure(pygame.sprite.Sprite):
     """
     the class of the treasures the hunter need to find
@@ -65,37 +67,39 @@ class Treasure(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.pos = treasure_pos
 
+
 char = Char('Yuta', initial_pos, 5)
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
 
-    pressed_keys = pygame.key.get_pressed()
-
-    if pressed_keys[pygame.K_LEFT]:
-        # draw out the map
-        # display the path char has taken
-        # char move to the left
-        # display possible next move
-
-    if pressed_keys[pygame.K_RIGHT]:
-        # draw out the map
-        # display the path char has taken
-        # char move to the left
-        # display possible next move
-
-    if pressed_keys[pygame.K_UP]:
-        # draw out the map
-        # display the path char has taken
-        # char move up
-        # display possible next move
-
-    if pressed_keys[pygame.K_DOWN]:
-        # draw out the map
-        # display the path char has taken
-        # char move down
-        # display possible next move
-
-    pygame.display.update()
+# while True:
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             sys.exit()
+#
+#     pressed_keys = pygame.key.get_pressed()
+#
+#     if pressed_keys[pygame.K_LEFT]:
+#         # draw out the map
+#         # display the path char has taken
+#         # char move to the left
+#         # display possible next move
+#
+#     if pressed_keys[pygame.K_RIGHT]:
+#         # draw out the map
+#         # display the path char has taken
+#         # char move to the left
+#         # display possible next move
+#
+#     if pressed_keys[pygame.K_UP]:
+#         # draw out the map
+#         # display the path char has taken
+#         # char move up
+#         # display possible next move
+#
+#     if pressed_keys[pygame.K_DOWN]:
+#         # draw out the map
+#         # display the path char has taken
+#         # char move down
+#         # display possible next move
+#
+#     pygame.display.update()
