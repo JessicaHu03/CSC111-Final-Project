@@ -153,9 +153,9 @@ class GameMap:
 
         while treasure_count < num_treasures:
             x = int((col_width + 2 * self._h_step) +
-                    random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 4))
+                    (random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 4)) + 0.5)
                     * self._h_step)
-            y = int(random.randint(2, self._div - 2) * self._v_step)
+            y = int((random.randint(2, self._div - 2) + 0.5) * self._v_step)
 
             rect_x = int(self._h_step * 2)
             rect_y = int(rect_x * self._object_type['treasure'][1])
