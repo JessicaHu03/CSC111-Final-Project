@@ -59,12 +59,11 @@ class _Vertex:
 class Graph:
     """A graph.
     """
-    _vertices: dict[Tuple[int, int], _Vertex]
+    _vertices: dict[str, _Vertex]
 
     def __init__(self) -> None:
         """Initialize an empty graph (no vertices or edges)."""
         self._vertices = dict()
-        self.add_vertex((0, 0))
 
     def length(self) -> int:
         """Returns the number of vertices"""
@@ -76,7 +75,7 @@ class Graph:
         The new vertex is not adjacent to any other vertices.
         """
         new_vertex = _Vertex(pos, set())
-        self._vertices[pos] = new_vertex
+        self._vertices[str(pos)] = new_vertex
 
     def add_edge(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> None:
         """Add an edge between the two vertices with the given items in this graph.
@@ -86,10 +85,10 @@ class Graph:
         Preconditions:
             - item1 != item2
         """
-        if pos1 in self._vertices and pos2 in self._vertices:
+        if str(pos1) in self._vertices and str(pos2) in self._vertices:
             # Add the edge between the two vertices
-            v1 = self._vertices[pos1]
-            v2 = self._vertices[pos2]
+            v1 = self._vertices[str(pos1)]
+            v2 = self._vertices[str(pos2)]
 
             v1.neighbours.add(v2)
             v2.neighbours.add(v1)
@@ -98,9 +97,9 @@ class Graph:
 
     def get_vertex(self, pos: Tuple[int, int]) -> _Vertex:
         """Return the vertex at the input position"""
-        return self._vertices[pos]
+        return self._vertices[str(pos)]
 
-    def get_vertices(self) -> dict[Tuple[int, int], _Vertex]:
+    def get_vertices(self) -> dict[str, _Vertex]:
         """Return _vertices"""
         return self._vertices
 
@@ -117,8 +116,9 @@ class Path:
                  graph: Graph, player: Player) -> None:
         """Initialize the default path with the given graph and map"""
         self.move_count = 0
-        self._graph = graph
         self._player = player
+        self._graph = graph
+        self._graph.add_vertex(self.current_pos())
         self._game_map = game_map
 
     def get_graph(self) -> Graph:
@@ -129,24 +129,6 @@ class Path:
         """Return current position in the path"""
         return self._player.get_pos()
 
-    def next_pos(self, movement: str, h_step: int, v_step) -> Tuple[int, int]:
-        """Returns the next position coordinate with the given movement and
-        step size.
-        """
-        coord_change = {'left': (-h_step, 0),
-                        'right': (h_step, 0),
-                        'up': (0, v_step),
-                        'down': (0, -v_step)}
-        if movement in coord_change:
-            next_pos = tuple(map(operator.add,
-                                 self.current_pos(),
-                                 coord_change[movement]))
-        else:
-            next_pos = self.current_pos()
-            print('Invalid Movement')
-
-        return next_pos
-
     def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)
 
@@ -154,6 +136,8 @@ class Path:
         in advance
         """
         self.move_count += 1
+
+        exist = False
         if new_pos not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
 

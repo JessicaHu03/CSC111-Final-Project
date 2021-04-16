@@ -1,7 +1,6 @@
 """
 This file contains the necessary class and methods for a player object
 """
-import operator
 from typing import Tuple
 
 
@@ -25,6 +24,7 @@ class Player:
     """
     user_id: str
     backpack: dict
+    initial_pos: Tuple[int, int]
     _position: Tuple[int, int]
     _vision_field: int
 
@@ -35,9 +35,16 @@ class Player:
         field radius.
         """
         self.user_id = user_id
+        self.initial_pos = initial_pos
         self._position = initial_pos
         self._vision_field = vision_field
-        self.backpack = {'treasure': 0, 'fragments': 0}
+        self.backpack = {'treasures': 0, 'fragments': 0}
+
+    def reset(self, omit_treasures: bool) -> None:
+        self._position = self.initial_pos
+        if not omit_treasures:
+            self.backpack['treasures'] = 0
+        self.backpack['fragments'] = 0
 
     def get_pos(self) -> Tuple[int, int]:
         """Returns the current position of the player."""

@@ -2,12 +2,10 @@
 This file contains the necessary classes and methods for a game map.
 Incorporating the generation and placement of game objects
 """
-from typing import Tuple, Any, Dict, List, Union
-from pygame.color import THECOLORS
+from typing import Tuple, Any, Dict, List
 import pygame as pg
 import numpy as np
 import random
-import time
 
 
 class GameMap:
@@ -23,13 +21,15 @@ class GameMap:
     _h_step: int
     _v_step: int
     _div: int
-    _state: Dict[str, int]
     _obstacles: List[Tuple[pg.Rect, str]]
-    _fragments: List[Tuple[pg.Rect, str]]
-    _treasures: List[Tuple[pg.Rect, str]]
+    _fragments: List[pg.Rect]
+    _treasures: List[pg.Rect]
+    _obstacle_info: List[Tuple[int, ...]]
+    _fragment_info: List[Tuple[int, ...]]
+    _treasure_info: List[Tuple[int, ...]]
     _object_type: Dict[str, Any]
 
-    def __init__(self, difficulty: int, screen_size: Tuple[int, int], div: int):
+    def __init__(self, difficulty: int, screen_size: Tuple[int, int], div: int, autogen: bool):
         """Initializes GameMap object with the given game difficulty, movement step size,
         and window size"""
         self._width = screen_size[0]
@@ -38,30 +38,25 @@ class GameMap:
         self._h_step = int(self._width / div)
         self._v_step = int(self._height / div)
         self._div = div
-        self._state = {
-            'keys': 0,
-            'fragments': 0,
-            'treasure': 1
-        }
         self._object_type = {
-            'rock': (THECOLORS['brown'], 2),
-            'river': (THECOLORS['blue'], 3),
-            'fragment': (THECOLORS['gold'], 1),
-            'treasure': (THECOLORS['gold'], 1/2)
+            'rock': ((236, 217, 199), 2),
+            'river': ((90, 164, 174), 3),
+            'fragment': ((193, 44, 31), 1),
+            'treasure': ((248, 188, 49), 1/2)
         }
-        self._obstacles = self.generate_obstacles()
-        self._fragments = self.generate_treasures()[0]
-        self._treasures = self.generate_treasures()[1]
+        if autogen:
+            self.generate_obstacles()
+            self.generate_treasures()
 
     def get_obstacles(self) -> List[Tuple[pg.Rect, str]]:
         """Return the generated obstacles of this map"""
         return self._obstacles
 
-    def get_fragments(self) -> List[Tuple[pg.Rect, str]]:
+    def get_fragments(self) -> List[pg.Rect]:
         """Return the generated fragments of this map"""
         return self._fragments
 
-    def get_treasures(self) -> List[Tuple[pg.Rect, str]]:
+    def get_treasures(self) -> List[pg.Rect]:
         """Return the generated treasures of this map"""
         return self._treasures
 
@@ -75,24 +70,11 @@ class GameMap:
         """Return the difficulty of this map"""
         return self._difficulty
 
-    def get_game_state(self, score_type: str) -> Any:
-        """Return the game_state of this map"""
-        if score_type == 'all':
-            return self._state
-        else:
-            if score_type in self._state:
-                return self._state[score_type]
-            else:
-                print("Invalid score type")
+    def get_screen_size(self) -> Tuple[int, int]:
+        """Return the width and height of the screen"""
+        return self._width, self._height
 
-    def update_game_state(self, score_type: str, change: int) -> None:
-        """Update game_state of this map"""
-        if score_type in self._state:
-            self._state[score_type] += change
-        else:
-            print("Invalid score type")
-
-    def generate_obstacles(self) -> List[Tuple[pg.Rect, str]]:
+    def generate_obstacles(self) -> None:
         """Generates the obstacles on the map with the required obstacle types.
 
         Calling this function will not update the obstacles attribute of the map.
@@ -103,32 +85,36 @@ class GameMap:
         col_count = 1
         obstacles = []
         obstacle_col = []
+        obstacle_heights = []
+        obstacle_col_info = []
         obstacle_info = []
 
         while col_count < col_num:
-            # print("Generating obstacles on column:" + str(col_count), end='\r')
-            # time.sleep(0.05)
 
             obstacle = random.choice(['rock', 'river'])
 
-            rect_gen, rect_height = self._generate_helper(col_count, obstacle)
+            rect_gen, rect_info = self._generate_helper(col_count, obstacle)
 
-            obstacle_info.append(rect_height)
+            obstacle_heights.append((rect_info[1], rect_info[3]))
 
             y = np.arange(0, self._height)
-            for x in obstacle_info:
+            for x in obstacle_heights:
                 remove_range(x[0], x[1], y)
 
             if len(obstacle_col) >= self._difficulty * 2\
                     or len(y) <= (6 - self._difficulty) * self._v_step:
+                obstacle_info.extend(obstacle_col_info)
                 obstacles.extend(obstacle_col)
                 col_count += 1
                 obstacle_col.clear()
-                obstacle_info.clear()
+                obstacle_col_info.clear()
+                obstacle_heights.clear()
             else:
+                obstacle_col_info.append(rect_info)
                 obstacle_col.append((rect_gen, obstacle))
 
-        return obstacles
+        self._obstacle_info = obstacle_info
+        self._obstacles = obstacles
 
     def generate_treasures(self):
         """Generates treasure objects (fragments and a treasure chest)"""
@@ -140,34 +126,39 @@ class GameMap:
         list_treasures = []
         fragments = []
         treasures = []
+        fragment_info = []
+        treasure_info = []
         frag_count = 0
         treasure_count = 0
 
         while frag_count < num_fragments:
             """Generating key fragments"""
             # All this does is putting the fragments in the middle of the grid lines
-            x = (col_width + 2 * self._h_step + self._h_step / 2) +\
-                random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 2)) * self._h_step
-            y = self._v_step / 2 + random.randint(1, self._div - 2) * self._v_step
+            x = int((col_width + 2 * self._h_step + self._h_step / 2) +
+                    random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 2))
+                    * self._h_step)
+            y = int(self._v_step / 2 + random.randint(1, self._div - 2) * self._v_step)
 
-            rect_x = self._h_step
-            rect_y = rect_x * self._object_type['fragment'][1]
+            rect_x = int(self._h_step)
+            rect_y = int(rect_x * self._object_type['fragment'][1])
 
             fragment_rect = pg.Rect(x, y, rect_x, rect_y)
 
             if fragment_rect.collidelist(list_obstacles) == -1:
                 if fragment_rect.collidelist(list_fragments) == -1:
                     list_fragments.append(fragment_rect)
-                    fragments.append((fragment_rect, 'fragment'))
+                    fragment_info.append((x, y, rect_x, rect_y))
+                    fragments.append(fragment_rect)
                     frag_count += 1
 
         while treasure_count < num_treasures:
-            x = (col_width + 2 * self._h_step) +\
-                random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 4)) * self._h_step
-            y = random.randint(2, self._div - 2) * self._v_step
+            x = int((col_width + 2 * self._h_step) +
+                    random.randint(1, int(self._div - (col_width + 2 * self._h_step) / self._h_step - 4))
+                    * self._h_step)
+            y = int(random.randint(2, self._div - 2) * self._v_step)
 
-            rect_x = self._h_step * 2
-            rect_y = rect_x * self._object_type['treasure'][1]
+            rect_x = int(self._h_step * 2)
+            rect_y = int(rect_x * self._object_type['treasure'][1])
 
             treasure_rect = pg.Rect(x, y, rect_x, rect_y)
 
@@ -175,12 +166,14 @@ class GameMap:
                 if treasure_rect.collidelist(list_fragments) == -1:
                     if treasure_rect.collidelist(list_treasures) == -1:
                         list_treasures.append(treasure_rect)
-                        treasures.append((treasure_rect, 'treasure'))
+                        treasure_info.append((x, y, rect_x, rect_y))
+                        treasures.append(treasure_rect)
                         treasure_count += 1
 
-        return fragments, treasures
+        self._fragments, self._treasures = fragments, treasures
+        self._fragment_info, self._treasure_info = fragment_info, treasure_info
 
-    def _generate_helper(self, col_count: int, obstacle: str) -> Tuple[pg.Rect, List[int]]:
+    def _generate_helper(self, col_count: int, obstacle: str) -> Tuple[pg.Rect, Tuple[int, ...]]:
         """Generates a single obstacle object in the given column"""
         col_width = (6 - self._difficulty) * self._h_step * 2
 
@@ -192,7 +185,7 @@ class GameMap:
 
         obstacle_rect = pg.Rect(x, y, rect_x, rect_y)
 
-        return obstacle_rect, [y, y + rect_y]
+        return obstacle_rect, (x, y, rect_x, rect_y)
 
 
 # Helper functions
