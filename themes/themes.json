@@ -10,6 +10,61 @@
         }
     },
 
+    "text_box":
+    {
+        "colours":
+        {
+            "normal_text": "#202020",
+            "normal_border": "#202020",
+            "dark_bg": "#A0A0A0",
+            "link_text": "#C0E0FF"
+        },
+        "misc":
+        {
+            "shape": "rectangle",
+            "shape_corner_radius": "15",
+            "border_width": "0"
+        },
+        "font":
+        {
+            "name": "IndieFlower",
+            "size": "18",
+            "bold": "1",
+            "italic": "0",
+            "regular_path": "fonts/IndieFlower-Regular.ttf"
+        }
+    },
+
+    "#1,1":
+    {
+      "colours":
+       {
+           "normal_bg": "#3083cf",
+           "hovered_bg": "#35393e",
+           "disabled_bg": "#25292e",
+           "selected_bg": "#25292e",
+           "active_bg": "#193784",
+           "normal_text": "#20df82",
+           "hovered_text": "#FFFFFF",
+           "selected_text": "#FFFFFF",
+           "disabled_text": "#6d736f",
+           "active_text": "#6d736f",
+           "normal_border": "#AAAAAA",
+           "hovered_border": "#B0B0B0",
+           "disabled_border": "#808080",
+           "selected_border": "#8080B0",
+           "active_border": "#8080B0"
+       },
+       "font":
+       {
+           "name": "IndieFlower",
+           "size": "18",
+           "bold": "1",
+           "italic": "0",
+           "regular_path": "fonts/IndieFlower-Regular.ttf"
+       }
+    },
+
     "drop_down_menu":
     {
         "colours":
@@ -36,23 +91,6 @@
             "border_width": "0",
             "shadow_width": "0",
             "shape_corner_radius": "5"
-        }
-    },
-
-    "text_box":
-    {
-        "colours":
-        {
-            "normal_text": "#202020",
-            "normal_border": "#202020",
-            "dark_bg": "#A0A0A0",
-            "link_text": "#C0E0FF"
-        },
-        "misc":
-        {
-            "shape": "rounded_rectangle",
-            "shape_corner_radius": "15",
-            "border_width": "0"
         }
     },
 

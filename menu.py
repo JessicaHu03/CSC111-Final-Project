@@ -3,6 +3,7 @@ import pygame as pg
 from pygame.locals import *
 import pygame_gui as pg_gui
 from typing import Tuple, List, Any
+from pygame_gui.core import IncrementalThreadedResourceLoader
 
 
 class Menu:
@@ -17,13 +18,21 @@ class Menu:
         self.menu_type = menu_type
         self.screen_size = screen_size
         self.screen = screen
+
         pg.init()
-        self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json')
-        self.manager.add_font_paths(font_name='IndieFlower', regular_path='fonts/IndieFlower-Regular.ttf')
-        font_list = [{'name': 'IndieFlower', 'point_size': 20, 'style': 'regular'}]
-        self.manager.preload_fonts(font_list)
-        self.clock = pg.time.Clock()
         pg.mouse.set_cursor(pg.cursors.diamond)
+
+        loader = IncrementalThreadedResourceLoader()
+        self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json', resource_loader=loader)
+
+        self.manager.add_font_paths(font_name='IndieFlower', regular_path='fonts/IndieFlower-Regular.ttf')
+
+        font_list = [{'name': 'IndieFlower', 'point_size': 18, 'style': 'regular'}]
+        self.manager.preload_fonts(font_list)
+
+        loader.start()
+
+        self.clock = pg.time.Clock()
 
     def display(self, on: bool) -> None:
         """Display module for all menus"""
@@ -49,12 +58,13 @@ class NameEntry(Menu):
         button_rect = pg.Rect(button_rect_pos, (80, 40))
         button = pg_gui.elements.UIButton(relative_rect=button_rect,
                                           text='Enter',
-                                          manager=self.manager)
+                                          manager=self.manager,
+                                          object_id='#' + str(1) + ',' + str(1))
 
         info_rect_pos = (int(screen_size[0] / 2 - 150 - 5), int(screen_size[1] / 2 - 70))
-        info_rect = pg.Rect(info_rect_pos, (218, 48))
+        info_rect = pg.Rect(info_rect_pos, (230, 50))
         info_text = pg_gui.elements.UITextBox(relative_rect=info_rect,
-                                              html_text="<font face='IndieFlower'>Please enter your name:</font>",
+                                              html_text="Please enter your name:",
                                               manager=self.manager)
         self._name_entry = text_entry
         self._enter_button = button
