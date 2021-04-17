@@ -20,7 +20,7 @@ class Menu:
         pg.init()
         self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json')
         self.manager.add_font_paths(font_name='IndieFlower', regular_path='fonts/IndieFlower-Regular.ttf')
-        font_list = [{'name': 'IndieFlower', 'point_size': 30}]
+        font_list = [{'name': 'IndieFlower', 'point_size': 20, 'style': 'regular'}]
         self.manager.preload_fonts(font_list)
         self.clock = pg.time.Clock()
         pg.mouse.set_cursor(pg.cursors.diamond)
