@@ -52,7 +52,7 @@
         {
             "shape": "rounded_rectangle",
             "shape_corner_radius": "15",
-            "border_width": "3"
+            "border_width": "0"
         }
     },
 

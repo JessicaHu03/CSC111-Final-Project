@@ -85,7 +85,7 @@ class NameEntry(Menu):
 
             self.manager.update(time_delta)
 
-            self.screen.fill((223, 206, 180))
+            self.screen.fill((243, 166, 148))
             self.manager.draw_ui(self.screen)
 
             pg.display.update()

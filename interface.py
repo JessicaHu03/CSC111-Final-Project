@@ -212,7 +212,7 @@ class GameDisplay:
                             is_paused = not is_paused
 
                 # Fills screen
-                self.screen.fill((191, 192, 150))
+                self.screen.fill((243, 166, 148))
 
                 # Draws player rectangle object onto screen
                 pg.draw.rect(self.screen, (255, 255, 255), player_rect)

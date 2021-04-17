@@ -10,7 +10,7 @@ from path import Path
 if __name__ == "__main__":
     screen_size = (800, 800)
     game = Game()
-    game.generate_maps(num=4, difficulty=2)
+    game.generate_maps(num=0, difficulty=2)
     game.read()
 
     player = Player('Test')
