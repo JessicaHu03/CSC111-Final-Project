@@ -2,15 +2,14 @@
 This is the main game file contains the relevant execution of a Pygame
 interface for the game.
 """
-
+from game import Game
 import pygame as pg
 from pygame.locals import *
-from map import GameMap
-from player import Player
-from path import Path, Graph
 from typing import Tuple
-from game import Game
-import time
+import menu
+from path import Path
+from player import Player
+from map import GameMap
 import os
 
 
@@ -78,13 +77,6 @@ class GameDisplay:
             if delay <= 0:
                 text_off = True
 
-    def show_score(self, game: Game):
-        treasures = self.msg_font.render('Treasures:' + str(game.player.backpack['treasures']), True, (255, 255, 255))
-        fragments = self.msg_font.render('Fragments:' + str(game.player.backpack['fragments']), True, (255, 255, 255))
-
-        self.screen.blit(treasures, (50, 20))
-        self.screen.blit(fragments, (50, 50))
-
     def game_end(self, num_steps: int):
         game_exit = False
         delay = 5000
@@ -113,140 +105,182 @@ class GameDisplay:
 
     def run_game(self, game: Game) -> None:
         """Runs the game"""
-
-        # Defines player movement step size
-        h_step, v_step = game.game_map.get_step()
-
-        # Change in position according to movement event
-        dir_key = {K_LEFT: (-h_step, 0), K_RIGHT: (h_step, 0), K_UP: (0, -v_step), K_DOWN: (0, v_step)}
-        # Assign keys to movement names
-        dir_name = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
-        # Assign keys to those for opposite direction. This is for reversing a move
-        dir_opposite = {K_LEFT: K_RIGHT, K_RIGHT: K_LEFT, K_UP: K_DOWN, K_DOWN: K_UP}
-
-        # Obtains game objects from the map
-        obstacle_list_type = [(x[0], x[1]) for x in game.game_map.get_obstacles()]
-        obstacle_list = [x[0] for x in game.game_map.get_obstacles()]
-        treasure_list = game.game_map.get_treasures()
-        fragment_list = game.game_map.get_fragments()
-
         pg.display.set_caption("Treasure Hunt game!")
-
-        # Retrieves object types and their relevant information
-        object_type = game.game_map.get_object_types()
-
-        rect_size = (8, 8)
-        rect_pos = game.player.initial_pos
-        vision_radius = game.player.get_vision_radius()
-        # This is for returning the player upon treasure collision with not enough fragments
-        player_rect = pg.Rect(rect_pos, rect_size)
 
         # Game Loop
         show_all = False
         exit_game = False
+        game_start = False
+        player_set = False
+        is_paused = False
+        name_entry = menu.NameEntry(self.screen_size, self.screen)
+        settings_menu = menu.Settings(self.screen_size, self.screen)
+        main_menu = menu.MainMenu(self.screen_size, self.screen)
+        pause = menu.Pause(self.screen_size, self.screen)
+
+        rect_size = (8, 8)
+        rect_pos = game.path.initial_pos
+
+        game.player.set_vision_radius(20)
+        vision_radius = game.player.get_vision_radius()
+        # This is for returning the player upon treasure collision with not enough fragments
+        player_rect = pg.Rect(rect_pos, rect_size)
+
         while not exit_game:
-            game.player.update_pos(rect_pos)
+            name_on = not player_set
+            settings_on = False
 
-            # Checks for possible movements given obstacles in the current map
-            possible_movements = ['left', 'right', 'up', 'down']
-            available_movements = []
-            for move in possible_movements:
-                new_pos = next_pos(rect_pos, move, h_step, v_step)
-                new_rect = pg.Rect(new_pos, rect_size)
-                if new_rect.collidelist(obstacle_list) == -1:
-                    available_movements.append(move)
+            name_entry.display(name_on)
+            player_set = True
 
-            event_key = None
-            for event in pg.event.get():
-                if event.type == QUIT:
-                    exit_game = True
-                    pg.quit()
-
-                if event.type == KEYDOWN:
-                    # Assign rectangle movements according to key event if movement is valid
-                    if event.key in dir_key and dir_name[event.key] in available_movements:
-                        event_key = event.key
-
-                        pos_change = dir_key[event.key]
-                        rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
-                        player_rect.move_ip(pos_change)
-
-                        game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
-
-                    if event.key == K_f:
-                        show_all = not show_all
-
-            # Fills screen
-            self.screen.fill((191, 192, 150))
-
-            # Draws player rectangle object onto screen
-            pg.draw.rect(self.screen, (255, 255, 255), player_rect)
-
-            if show_all:
-                # Draws all game objects onto screen if show_all is True
-                for o in obstacle_list_type:
-                    pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
-                for treasure in treasure_list:
-                    pg.draw.rect(self.screen, (248, 188, 49), treasure)
-                for fragment in fragment_list:
-                    pg.draw.rect(self.screen, (193, 44, 31), fragment)
+            if game_start:
+                menu_on = False
             else:
-                # Otherwise, utilizes vision field function
-                path_pos = game.path.all_pos()
+                menu_on = True
 
-                vision_rect_size = (rect_size[0] + 2 * vision_radius, rect_size[1] + 2 * vision_radius)
-                vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in path_pos]
-
-                vision_rects = [pg.Rect(pos, vision_rect_size) for pos in vision_rect_pos]
-
-                for o in obstacle_list_type:
-                    if o[0].collidelist(vision_rects) != -1:
-                        pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
-                for treasure in treasure_list:
-                    if treasure.collidelist(vision_rects) != -1:
-                        pg.draw.rect(self.screen, (248, 188, 49), treasure)
-                for fragment in fragment_list:
-                    if fragment.collidelist(vision_rects) != -1:
-                        pg.draw.rect(self.screen, (193, 44, 31), fragment)
-
-            # Adds grid to the screen
-            self.draw_grid(40)
-
-            # Checks for fragment and treasure collision
-            # Treasure Collision
-            treasure_collision_index = player_rect.collidelist(treasure_list)
-            if treasure_collision_index != -1:
-                # With at least 3 fragments on treasure collision
-                if game.player.backpack['fragments'] >= 3:
-                    # Remove collided treasure from list
-                    del treasure_list[treasure_collision_index]
-                    game.player.update_backpack('treasures', 1)
-                    game.player.update_backpack('fragments', -3)
-                # Not enough fragments on treasure collision
-                else:
-                    # Moves player back to their last position
-                    pos_change = dir_key[dir_opposite[event_key]]
-                    rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
-                    player_rect.move_ip(pos_change)
-                    # Prints info message
-                    self.not_enough_fragment()
-
-            # Fragment Collision
-            fragment_collision_index = player_rect.collidelist(fragment_list)
-            if fragment_collision_index != -1:
-                # remove collided fragment from list
-                del fragment_list[fragment_collision_index]
-                game.player.update_backpack('fragments', 1)
-
-            # On winning game
-            if game.player.backpack['treasures'] == game.game_map.get_difficulty():
-                self.game_end(game.path.move_count)
+            main_option = main_menu.display(menu_on)
+            if main_option == 'Start':
+                game_start = True
+            elif main_option == 'Settings':
+                settings_on = True
+            else:
                 exit_game = True
 
-            # Display current number of fragments and treasures the player has found
-            self.show_score(game)
+            settings_menu.display(settings_on)
+            map_id = settings_menu.map_id
+            current_mode = settings_menu.mode
 
-            pg.display.flip()
+            game.set_map(map_id)
+
+            # Defines player movement step size
+            h_step, v_step = game.game_map.get_step()
+
+            # Obtains game objects from the map
+            obstacle_list_type = [(x[0], x[1]) for x in game.game_map.get_obstacles()]
+            obstacle_list = [x[0] for x in game.game_map.get_obstacles()]
+            treasure_list = game.game_map.get_treasures()
+            fragment_list = game.game_map.get_fragments()
+
+            # Retrieves object types and their relevant information
+            object_type = game.game_map.get_object_types()
+
+            # Change in position according to movement event
+            dir_key = {K_LEFT: (-h_step, 0), K_RIGHT: (h_step, 0), K_UP: (0, -v_step), K_DOWN: (0, v_step)}
+            # Assign keys to movement names
+            dir_name = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
+            # Assign keys to those for opposite direction. This is for reversing a move
+            dir_opposite = {K_LEFT: K_RIGHT, K_RIGHT: K_LEFT, K_UP: K_DOWN, K_DOWN: K_UP}
+
+            if game_start:
+                # Checks for possible movements given obstacles in the current map
+                possible_movements = ['left', 'right', 'up', 'down']
+                available_movements = []
+                for move in possible_movements:
+                    new_pos = next_pos(rect_pos, move, h_step, v_step)
+                    new_rect = pg.Rect(new_pos, rect_size)
+                    if new_rect.collidelist(obstacle_list) == -1:
+                        available_movements.append(move)
+
+                event_key = None
+                for event in pg.event.get():
+                    if event.type == QUIT:
+                        exit_game = True
+                        pg.quit()
+
+                    if event.type == KEYDOWN:
+                        # Assign rectangle movements according to key event if movement is valid
+                        if event.key in dir_key and dir_name[event.key] in available_movements:
+                            event_key = event.key
+
+                            pos_change = dir_key[event.key]
+                            rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
+                            player_rect.move_ip(pos_change)
+
+                            game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
+
+                        if event.key == K_f:
+                            show_all = not show_all
+
+                        if event.key == K_ESCAPE:
+                            is_paused = not is_paused
+
+                # Fills screen
+                self.screen.fill((191, 192, 150))
+
+                # Draws player rectangle object onto screen
+                pg.draw.rect(self.screen, (255, 255, 255), player_rect)
+
+                if show_all:
+                    # Draws all game objects onto screen if show_all is True
+                    for o in obstacle_list_type:
+                        pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
+                    for treasure in treasure_list:
+                        pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                    for fragment in fragment_list:
+                        pg.draw.rect(self.screen, (193, 44, 31), fragment)
+                else:
+                    # Otherwise, utilizes vision field function
+                    path_pos = game.path.all_pos()
+
+                    vision_rect_size = (rect_size[0] + 2 * vision_radius, rect_size[1] + 2 * vision_radius)
+                    vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in path_pos]
+
+                    vision_rects = [pg.Rect(pos, vision_rect_size) for pos in vision_rect_pos]
+
+                    for o in obstacle_list_type:
+                        if o[0].collidelist(vision_rects) != -1:
+                            pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
+                    for treasure in treasure_list:
+                        if treasure.collidelist(vision_rects) != -1:
+                            pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                    for fragment in fragment_list:
+                        if fragment.collidelist(vision_rects) != -1:
+                            pg.draw.rect(self.screen, (193, 44, 31), fragment)
+
+                # Adds grid to the screen
+                self.draw_grid(40)
+
+                pause_option = pause.display(is_paused)
+                is_paused = False
+                if pause_option == 'exit':
+                    game.player.reset()
+                    game_start = False
+                    pause.reset()
+
+                # Checks for fragment and treasure collision
+                # Treasure Collision
+                treasure_collision_index = player_rect.collidelist(treasure_list)
+                if treasure_collision_index != -1:
+                    # With at least 3 fragments on treasure collision
+                    if game.player.backpack['fragments'] >= 3:
+                        # Remove collided treasure from list
+                        del treasure_list[treasure_collision_index]
+                        game.player.update_backpack('treasures', 1)
+                        game.player.update_backpack('fragments', -3)
+                    # Not enough fragments on treasure collision
+                    else:
+                        # Moves player back to their last position
+                        pos_change = dir_key[dir_opposite[event_key]]
+                        rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
+                        player_rect.move_ip(pos_change)
+                        # Prints info message
+                        self.not_enough_fragment()
+
+                # Fragment Collision
+                fragment_collision_index = player_rect.collidelist(fragment_list)
+                if fragment_collision_index != -1:
+                    # remove collided fragment from list
+                    del fragment_list[fragment_collision_index]
+                    game.player.update_backpack('fragments', 1)
+
+                # On winning game
+                if game.player.backpack['treasures'] == game.game_map.get_difficulty():
+                    game.player.update_data(game.game_map.get_difficulty())
+                    game.player.reset()
+                    self.game_end(game.path.move_count)
+                    exit_game = True
+
+                pg.display.flip()
 
             self.clock.tick(60)
 
@@ -263,20 +297,16 @@ def next_pos(cur_pos: Tuple[int, int], move: str, h_step, v_step) -> Tuple[int, 
     return possible_next_pos[move]
 
 
-def test() -> None:
-    """Tests all relevant functions from each modules"""
-    # TODO implement this to the Game Class
-    # Initializes empty graph
-    graph = Graph()
-    # Initializes player with default position
-    ply = Player('Test', (int(20 - 8 / 2), int(400 - 8 / 2)), 20)
+def run():
+    """Runs the game"""
+    # Initializes player
+    ply = Player('Test')
 
     # New GameMap object with generated game objects
     map1 = GameMap((800, 800), 40, True)
     # Save map to file
-    map1.save_map()
-    print("Saving map")
-    time.sleep(2)
+    map1.write_map()
+
     # Retrieve the name of the map that was just saved
     map_num = len([m for m in os.listdir('maps/')])
     map_name = 'map{}.csv'.format(map_num)
@@ -287,9 +317,9 @@ def test() -> None:
     map2.read_map(map_path)
 
     # Assign map and player to the Path
-    p = Path(map1, graph, ply)
+    p = Path((int(20 - 8 / 2), int(400 - 8 / 2)), 1, '1')
     # Initializes game
-    game = Game(map2, p, ply)
+    game = Game()
 
     # Initializes Game Display
     display = GameDisplay((800, 800))

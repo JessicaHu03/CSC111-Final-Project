@@ -3,9 +3,9 @@ a number of game runs with a fixed map.
 """
 
 from __future__ import annotations
-from typing import Tuple, List
-from map import GameMap
-from player import Player
+from typing import Tuple, List, Optional
+import pandas as pd
+import os
 
 
 class _Vertex:
@@ -106,31 +106,29 @@ class Graph:
 class Path:
     """A path that records player's path movements utilizing the Graph
     data structure"""
-    _graph: Graph
-    _player: Player
+    id: int
     move_count: int
-    # Note that a path object doesn't actually need the game_map for any of its functions
-    # Instead, it is just to indicate which map this path is for
-    _game_map: GameMap
+    initial_pos: Tuple[int, int]
+    _map_id: int
+    _graph: Graph
+    _player_id: str
     _all_pos: List[Tuple[int, int]]
 
-    def __init__(self, game_map: GameMap,
-                 graph: Graph, player: Player) -> None:
+    def __init__(self, initial_pos: Tuple[int, int],
+                 map_id: Optional[int] = 0,
+                 player_id: Optional[str] = "Default") -> None:
         """Initialize the default path with the given graph and map"""
+        self.initial_pos = initial_pos
         self.move_count = 0
-        self._player = player
-        self._graph = graph
-        self._graph.add_vertex(self.current_pos())
-        self._game_map = game_map
-        self._all_pos = []
+        self._map_id = map_id
+        self._player_id = player_id
+        self._graph = Graph()
+        self._all_pos = list()
+        self.update_path(initial_pos)
 
     def get_graph(self) -> Graph:
         """Return the Graph"""
         return self._graph
-
-    def current_pos(self) -> Tuple[int, int]:
-        """Return current position in the path"""
-        return self._player.get_pos()
 
     def all_pos(self) -> List[Tuple[int, int]]:
         """Return all the past positions of the player"""
@@ -148,5 +146,65 @@ class Path:
             self._graph.add_vertex(new_pos)
             self._all_pos.append(new_pos)
 
-        self._graph.add_edge(self.current_pos(), new_pos)
+        if len(self._graph.get_vertices()) > 1:
+            self._graph.add_edge(self._all_pos[-2], new_pos)
+
+    def write_path(self) -> None:
+        """Saves relevant information for the current path to file"""
+        # Returns number of existing paths from directory
+        path_num = len([m for m in os.listdir('paths/')])
+        self.id = path_num + 1
+
+        # Retrieves specific object information, save to dataframe
+        player_id = pd.DataFrame({'player_id': self._player_id}, index=[0])
+        map_id = pd.DataFrame({'map_id': self._map_id}, index=[0])
+        initial_pos = pd.DataFrame({'initial_pos': self.initial_pos})
+        vertices = pd.DataFrame({'vertices': self._graph.get_vertices().keys()})
+        neighbours = pd.DataFrame({'neighbours': [[n.pos for n in v.neighbours]
+                                                  for v in self._graph.get_vertices().values()]})
+
+        # Concatenate all information to a single dataframe. This may be bad practice, for that
+        # the elements from one row aren't correlated, and there is a different number of observations
+        # per variable. Using Pandas here is just for code cleanliness and computational simplicity.
+        object_info = pd.concat([vertices, neighbours, initial_pos, player_id, map_id],
+                                axis=1, ignore_index=False)
+
+        # Sets new path name. This is given by 'path' + the path index.
+        path_name = 'path{}.csv'.format(self.id)
+        # Saves map file to directory
+        object_info.to_csv(os.path.join(r'paths\\', path_name), index=False)
+
+    def read_path(self, path_file: str) -> None:
+        """Reads a path from file, retrieving all relevant information required
+        to rebuild a path"""
+        # Reading path file
+        df = pd.read_csv(path_file, index_col=False)
+
+        # Retrieve vertices and settings for path, indexing by column name
+        player_id = df['player_id'][0]
+        map_id = int(df['map_id'][0])
+        initial_pos = df['initial_pos'][0]
+        vertices = df['vertices'].tolist()
+        neighbours = df['neighbours'].tolist()
+
+        # Each value of the DataFrame is of type string, except for the player and map ids
+        # Thus, by evaluating each returns the tuple objects.
+        if vertices and neighbours:
+            vertices = [eval(vertex) for vertex in vertices]
+            neighbours = [eval(neighbour_set) for neighbour_set in neighbours]
+
+        # Assign each neighbour set to their relevant vertex
+        assert len(vertices) == len(neighbours)
+
+        for i in range(len(vertices)):
+            self._graph.add_vertex(vertices[i])
+
+        for i in range(len(vertices)):
+            for j in range(len(neighbours[i])):
+                self._graph.add_edge(vertices[i], neighbours[i][j])
+
+        self.initial_pos = initial_pos
+        self._player_id = player_id
+        self._map_id = map_id
+
 

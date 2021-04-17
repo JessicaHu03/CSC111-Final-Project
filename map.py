@@ -16,6 +16,7 @@ class GameMap:
     The difficulty attribute indicates the number of obstacles that will occupy the map,
     and how many fragments and treasures are needed to be found.
     """
+    id: int
     _width: int
     _height: int
     _difficulty: int
@@ -89,21 +90,25 @@ class GameMap:
         that's where the information is saved to"""
         # Iterates through the obstacle object information to generate
         # new obstacle rectangles with their relevant type assigned.
+        obstacles = []
         for rect, types in self.get_object_info()[0]:
             obstacle_rect = pg.Rect(rect)
-            self._obstacles.append((obstacle_rect, types))
-
+            obstacles.append((obstacle_rect, types))
+        self._obstacles = obstacles
         # Iterates through the fragment objects information to generate
         # new fragment rectangles.
+        fragments = []
         for rect in self.get_object_info()[1]:
             fragment_rect = pg.Rect(rect)
-            self._fragments.append(fragment_rect)
-
+            fragments.append(fragment_rect)
+        self._fragments = fragments
         # Iterates through the treasure objects information to generate
         # new treasure rectangles.
+        treasures = []
         for rect in self.get_object_info()[2]:
             treasure_rect = pg.Rect(rect)
-            self._treasures.append(treasure_rect)
+            treasures.append(treasure_rect)
+        self._treasures = treasures
 
     def generate_obstacles(self) -> None:
         """Generates the obstacles on the map with the required obstacle types.
@@ -241,11 +246,11 @@ class GameMap:
 
         return obstacle_rect, (x, y, rect_x, rect_y)
 
-    def save_map(self) -> None:
+    def write_map(self) -> None:
         """Save the current map information to a new file under directory 'maps', with name map[num].csv"""
         # Returns number of existing maps from directory
         map_num = len([m for m in os.listdir('maps/')])
-
+        self.id = map_num + 1
         # Retrieves specific object information, save to dataframe
         obstacle_info = pd.DataFrame({'obstacle': [x[0] for x in self.get_object_info()[0]]})
         obstacle_type = pd.DataFrame({'obstacle_type': [x[1] for x in self.get_object_info()[0]]})
@@ -262,7 +267,7 @@ class GameMap:
                                 axis=1, ignore_index=False)
 
         # Sets new map name. This is given by 'maps' + the map index.
-        map_name = 'map{}.csv'.format(map_num + 1)
+        map_name = 'map{}.csv'.format(self.id)
         # Saves map file to directory
         object_info.to_csv(os.path.join(r'maps\\', map_name), index=False)
 
