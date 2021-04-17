@@ -77,6 +77,13 @@ class GameDisplay:
             if delay <= 0:
                 text_off = True
 
+    def show_score(self, game: Game):
+        treasures = self.msg_font.render('Treasures:' + str(game.player.backpack['treasures']), True, (255, 255, 255))
+        fragments = self.msg_font.render('Fragments:' + str(game.player.backpack['fragments']), True, (255, 255, 255))
+
+        self.screen.blit(treasures, (50, 20))
+        self.screen.blit(fragments, (50, 50))
+
     def game_end(self, num_steps: int):
         game_exit = False
         delay = 5000
@@ -279,6 +286,9 @@ class GameDisplay:
                     game.player.reset()
                     self.game_end(game.path.move_count)
                     exit_game = True
+
+                # Display current number of fragments and treasures the player has found
+                self.show_score(game)
 
                 pg.display.flip()
 

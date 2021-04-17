@@ -179,7 +179,6 @@ class Path:
         to rebuild a path"""
         # Reading path file
         df = pd.read_csv(path_file, index_col=False)
-
         # Retrieve vertices and settings for path, indexing by column name
         player_id = df['player_id'][0]
         map_id = int(df['map_id'][0])

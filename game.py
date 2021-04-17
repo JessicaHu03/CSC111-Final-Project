@@ -4,6 +4,7 @@ from player import Player
 from map import GameMap
 from path import Path
 import os
+import pandas as pd
 
 
 class Game:
@@ -40,30 +41,35 @@ class Game:
             new_map = GameMap(self.screen_size, self.div, True, difficulty)
             new_map.write_map()
 
+    def add_player(self, player_id):
+        self.player_list.append(player_id)
+
     def read(self) -> None:
         """Read from all data"""
         map_num = len([m for m in os.listdir('maps/')])
         path_num = len([m for m in os.listdir('paths/')])
         # Reading game maps
-        for i in range(1, map_num + 1):
-            map_name = 'map{}.csv'.format(i)
-            map_dir = os.path.join(r'maps\\', map_name)
+        if map_num != 0:
+            for i in range(1, map_num + 1):
+                map_name = 'map{}.csv'.format(i)
+                map_dir = os.path.join(r'maps\\', map_name)
 
-            new_map = GameMap(self.screen_size, self.div, False)
-            new_map.read_map(map_dir)
-            self.map_list.append(new_map)
+                new_map = GameMap(self.screen_size, self.div, False)
+                new_map.read_map(map_dir)
+                self.map_list.append(new_map)
 
         # Reading paths
-        for i in range(1, path_num + 1):
-            path_name = 'map{}.csv'.format(i)
-            path_dir = os.path.join(r'maps\\', path_name)
+        if path_num != 0:
+            for i in range(1, path_num + 1):
+                path_name = 'path{}.csv'.format(i)
+                path_dir = os.path.join(r'paths\\', path_name)
 
-            pos = (int(self.screen_size[0] / self.div - self.player_rect[0] / 2),
-                   int(self.screen_size[1] / 2 - self.player_rect[1] / 2))
+                pos = (int(self.screen_size[0] / self.div - self.player_rect[0] / 2),
+                       int(self.screen_size[1] / 2 - self.player_rect[1] / 2))
 
-            new_path = Path(initial_pos=pos)
-            new_path.read_path(path_dir)
-            self.path_list.append(new_path)
+                new_path = Path(initial_pos=pos)
+                new_path.read_path(path_dir)
+                self.path_list.append(new_path)
 
     def write(self) -> None:
         """Writes all data into file"""
@@ -71,6 +77,7 @@ class Game:
             game_map.write_map()
         for path in self.path_list:
             path.write_path()
+
 
 
 

@@ -138,19 +138,20 @@ class GameMap:
             y = np.arange(0, self._height)
             # For each rectangle generated, its height range is removed from the list.
             # e.g. Rectangle that occupies from y = 200 to y = 400 will remove that range,
-            # which then becomes (0, 1, 2,...,199, 401, 402,...,height)
+            # which then becomes (0, 1, 2,...,198,199, 401, 402,...,height)
             for x in obstacle_heights:
-                remove_range(x[0], x[1], y)
+                y = remove_range(x[0], x[0] + x[1], y)
 
             # Checks whether total number of obstacles is reached either by game difficulty settings
             # or if there is no space left for the player to go through if the rectangle is added.
-            if len(obstacle_col) >= self._difficulty * 2\
-                    or len(y) <= (6 - self._difficulty) * self._v_step:
+            if len(obstacle_col) >= (self._difficulty * 2) or len(y) <= ((6 - self._difficulty) * self._v_step):
                 # Adds the column of obstacles to the list of all obstacles
                 obstacle_info.extend(obstacle_col_info)
                 obstacles.extend(obstacle_col)
                 col_count += 1
                 # Resets the column
+                print("col num:" + str(col_count))
+                print(y)
                 obstacle_col.clear()
                 obstacle_col_info.clear()
                 obstacle_heights.clear()
@@ -159,6 +160,7 @@ class GameMap:
                 if rect_gen.collidelist(obstacles_list) == -1:
                     obstacle_col_info.append((rect_info, obstacle))
                     obstacle_col.append((rect_gen, obstacle))
+                    print(len(obstacle_col))
                     obstacles_list.append(rect_gen)
 
         self._obstacle_info = obstacle_info

@@ -32,6 +32,7 @@ class Player:
         self.backpack = {'treasures': 0, 'fragments': 0}
         self.games_played = 0
         self.treasure_count = 0
+        self._vision_field = 20
 
     def reset(self) -> None:
         self.backpack['treasures'] = 0
@@ -55,15 +56,14 @@ class Player:
         self.games_played += 1
         self.treasure_count += difficulty
 
-        df = pd.read_csv('player_stat.csv', index_col="player_id")
+        df = pd.read_csv('player_stat.csv', index_col='player_id')
         try:
             df_player = df.loc[self.player_id]
         except KeyError:
-            df.append([self.player_id, self.games_played, self._vision_field, self.treasure_count])
+            df.loc[self.player_id] = [self.games_played, self._vision_field, self.treasure_count]
         else:
             df_player.loc['games_played'] = self.games_played
             df_player.loc['treasure_count'] = self.treasure_count
+            df.loc[self.player_id] = df_player
 
         df.to_csv('player_stat.csv')
-
-
