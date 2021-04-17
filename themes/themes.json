@@ -53,6 +53,14 @@
             "shape": "rounded_rectangle",
             "shape_corner_radius": "15",
             "border_width": "0"
+        },
+        "font":
+        {
+            "name": "montserrat",
+            "size": "30",
+            "bold": "1",
+            "italic": "0",
+            "regular_path": "themes/fonts/IndieFlower-Regular.ttf",
         }
     },
 
