@@ -110,7 +110,7 @@ class MainMenu(Menu):
         self.option_info = []
 
         default_color = (154, 167, 177)
-        options_font = pg.font.Font('themes/fonts/Prodelt Co.ttf', 40)
+        options_font = pg.font.Font('fonts/Prodelt Co.ttf', 40)
         for option in self.options:
             text_surface = options_font.render(option[0], True, default_color)
             text_rect = text_surface.get_rect()
@@ -154,7 +154,7 @@ class MainMenu(Menu):
             default_color = (154, 167, 177)
             hover_color = (243, 166, 148)
 
-            options_font = pg.font.Font('themes/fonts/Prodelt Co.ttf', 40)
+            options_font = pg.font.Font('fonts/Prodelt Co.ttf', 40)
 
             for option in self.options:
                 text_surface = options_font.render(option[0], True, default_color)

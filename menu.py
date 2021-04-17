@@ -1,5 +1,4 @@
 import os
-
 import pygame as pg
 from pygame.locals import *
 import pygame_gui as pg_gui
@@ -20,6 +19,9 @@ class Menu:
         self.screen = screen
         pg.init()
         self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json')
+        self.manager.add_font_paths(font_name='IndieFlower', regular_path='fonts/IndieFlower-Regular.ttf')
+        font_list = [{'name': 'IndieFlower', 'point_size': 30}]
+        self.manager.preload_fonts(font_list)
         self.clock = pg.time.Clock()
         pg.mouse.set_cursor(pg.cursors.diamond)
 
@@ -52,7 +54,7 @@ class NameEntry(Menu):
         info_rect_pos = (int(screen_size[0] / 2 - 150 - 5), int(screen_size[1] / 2 - 70))
         info_rect = pg.Rect(info_rect_pos, (218, 48))
         info_text = pg_gui.elements.UITextBox(relative_rect=info_rect,
-                                              html_text='Please enter your name:',
+                                              html_text="<font face='IndieFlower'>Please enter your name:</font>",
                                               manager=self.manager)
         self._name_entry = text_entry
         self._enter_button = button
@@ -110,7 +112,7 @@ class MainMenu(Menu):
         self.return_option = ''
 
         default_color = (154, 167, 177)
-        options_font = pg.font.Font('themes/fonts/Prodelt Co.ttf', 40)
+        options_font = pg.font.Font('fonts/Prodelt Co.ttf', 40)
         for option in self.options:
             text_surface = options_font.render(option[0], True, default_color)
             text_rect = text_surface.get_rect()
@@ -146,7 +148,7 @@ class MainMenu(Menu):
             default_color = (154, 167, 177)
             hover_color = (243, 166, 148)
 
-            options_font = pg.font.Font('themes/fonts/Prodelt Co.ttf', 40)
+            options_font = pg.font.Font('fonts/Prodelt Co.ttf', 40)
 
             for option in self.options:
                 text_surface = options_font.render(option[0], True, default_color)
