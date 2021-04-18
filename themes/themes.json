@@ -86,7 +86,7 @@
         {
             "name": "LoungeThings",
             "size": "30",
-            "bold": "3",
+            "bold": "0",
             "italic": "0",
             "regular_path": "fonts/Lounge-Things.otf"
         }

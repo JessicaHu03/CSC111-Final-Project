@@ -33,7 +33,7 @@ class Menu:
         self.manager.add_font_paths(font_name='LoungeThings', regular_path='fonts/Lounge-Things.otf')
 
         font_list = [{'name': 'IndieFlower', 'point_size': 30, 'style': 'regular'},
-                     {'name': 'LoungeThings', 'point_size': 30, 'style': 'regular'}]
+                     {'name': 'LoungeThings', 'point_size': 32, 'style': 'regular'}]
         self.manager.preload_fonts(font_list)
 
         loader.start()
@@ -68,7 +68,7 @@ class NameEntry(Menu):
                                           manager=self.manager,
                                           object_id='#' + str(1) + ',' + str(1))
 
-        info_rect_pos = (int(screen_size[0] / 2 - 150), int(screen_size[1] / 2 - 40))
+        info_rect_pos = (int(screen_size[0] / 2 - 150), int(screen_size[1] / 2 - 42))
         info_rect = pg.Rect(info_rect_pos, (220, 45))
         info_text = pg_gui.elements.UITextBox(relative_rect=info_rect,
                                               html_text="Please enter your name:",
@@ -152,6 +152,11 @@ class MainMenu(Menu):
         self.options.append(text)
 
     def display(self, on) -> str:
+        logo = pg.image.load("images/logo.png").convert_alpha()
+        logo_rect = logo.get_rect()
+        logo_size = logo.get_size()
+        logo_rect.topleft = (self.screen_size[0] / 2 - logo_size[0] / 2, self.screen_size[1] * 0.08)
+
         while on:
             mouse_pos = pg.mouse.get_pos()
             for event in pg.event.get():
@@ -180,6 +185,7 @@ class MainMenu(Menu):
 
                 self.screen.blit(text_surface, text_rect)
 
+            self.screen.blit(logo, logo_rect)
             pg.display.update()
 
         return self.return_option
