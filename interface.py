@@ -114,8 +114,9 @@ class GameDisplay:
     def run_game(self, game: Game) -> None:
         """Runs the game"""
         pg.display.set_caption("Treasure Hunt game!")
+        line_color = pg.Color('#8c8c91')
 
-        # Game Loop
+        # Initializes game loop booleans
         draw_path = False
         draw_grid = True
         show_all = False
@@ -123,6 +124,7 @@ class GameDisplay:
         game_start = False
         player_set = False
         is_paused = False
+        # Create Game Menu Objects
         name_entry = menu.NameEntry(self.screen_size, self.screen)
         settings_menu = menu.Settings(self.screen_size, self.screen)
         main_menu = menu.MainMenu(self.screen_size, self.screen)
@@ -132,6 +134,8 @@ class GameDisplay:
         rect_size = (8, 8)
         rect_pos = (0, 0)
         player_rect = pg.Rect(rect_pos, rect_size)
+
+        # Sets default map and path
         game.set_map(1)
         game.reset_path()
 
@@ -263,7 +267,7 @@ class GameDisplay:
                         pg.draw.rect(self.screen, fragment_color, fragment)
                 else:
                     # Otherwise, utilizes vision field function
-                    path_pos = game.path.all_pos()
+                    path_pos = game.path.all_pos
 
                     vision_rect_size = (rect_size[0] + 2 * vision_radius, rect_size[1] + 2 * vision_radius)
                     vision_rect_pos = [(pos[0] - vision_radius, pos[1] - vision_radius) for pos in path_pos]
@@ -294,14 +298,14 @@ class GameDisplay:
 
                 # Showing the path of the player
                 if draw_path:
-                    path_graph = game.path.get_graph().get_vertices()
-                    initial_pos = game.path.initial_pos
-                    line_color = pg.Color('#8c8c91')
-                    for v in path_graph:
-                        for neighbors in path_graph[v]:
-                            temp_pos = path_graph[v].pos
-                            pg.draw.line(self.screen, line_color, initial_pos, temp_pos)
-                            initial_pos = temp_pos
+                    path_vertices = game.path.get_graph().get_vertices().values()
+                    for vertex in path_vertices:
+                        pos = vertex.pos
+                        neighbours = vertex.neighbours
+                        for neighbour in neighbours:
+                            init_pos = (pos[0] + rect_size[0] / 2, pos[1] + rect_size[1] / 2)
+                            end_pos = (neighbour.pos[0] + rect_size[0] / 2, neighbour.pos[1] + rect_size[1] / 2)
+                            pg.draw.line(self.screen, line_color, init_pos, end_pos)
 
                 is_paused = False
                 # Checks for fragment and treasure collision

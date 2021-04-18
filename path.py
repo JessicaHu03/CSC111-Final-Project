@@ -109,22 +109,26 @@ class Path:
     path_id: int
     move_count: int
     initial_pos: Tuple[int, int]
+    pos_record: List[Tuple[int, int]]
+    all_pos: List[Tuple[int, int]]
     _map_id: int
     _graph: Graph
     _player_id: str
-    _all_pos: List[Tuple[int, int]]
 
     def __init__(self, initial_pos: Tuple[int, int],
-                 map_id: Optional[int] = 0,
+                 map_id: Optional[int] = 1,
                  player_id: Optional[str] = "Default") -> None:
         """Initialize the default path with the given graph and map"""
         self.initial_pos = initial_pos
         self.move_count = 0
+        self.all_pos = list()
+        self.all_pos.append(initial_pos)
+        self.pos_record = list()
+        self.pos_record.append(initial_pos)
         self._map_id = map_id
         self._player_id = player_id
         self._graph = Graph()
-        self._all_pos = list()
-        self.update_path(initial_pos)
+        self._graph.add_vertex(initial_pos)
 
     def get_graph(self) -> Graph:
         """Return the Graph"""
@@ -134,10 +138,6 @@ class Path:
         """Sets the corresponding game_map for path"""
         self._map_id = map_id
 
-    def all_pos(self) -> List[Tuple[int, int]]:
-        """Return all the past positions of the player"""
-        return self._all_pos
-
     def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)
 
@@ -145,13 +145,14 @@ class Path:
         in advance
         """
         self.move_count += 1
+        current = self.pos_record[-1]
 
-        if new_pos not in self._graph.get_vertices():
+        self.pos_record.append(new_pos)
+        if str(new_pos) not in self._graph.get_vertices():
             self._graph.add_vertex(new_pos)
-            self._all_pos.append(new_pos)
+            self.all_pos.append(new_pos)
 
-        if len(self._graph.get_vertices()) > 1:
-            self._graph.add_edge(self._all_pos[-2], new_pos)
+        self._graph.add_edge(current, new_pos)
 
     def write_path(self) -> None:
         """Saves relevant information for the current path to file"""
