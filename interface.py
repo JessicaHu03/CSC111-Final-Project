@@ -130,6 +130,8 @@ class GameDisplay:
         rect_size = (8, 8)
         rect_pos = (0, 0)
         player_rect = pg.Rect(rect_pos, rect_size)
+        game.set_map(1)
+        game.reset_path()
 
         while not exit_game:
             name_on = not player_set
@@ -150,7 +152,6 @@ class GameDisplay:
 
             main_option = main_menu.display(menu_on)
             if main_option == 'Start':
-                game.set_map(1)
                 game.reset_path()
 
                 rect_pos = game.path.initial_pos
@@ -237,14 +238,18 @@ class GameDisplay:
                 # Draws player rectangle object onto screen
                 pg.draw.rect(self.screen, (255, 255, 255), player_rect)
 
+                # Sets color for fragment and treasures
+                treasure_color = pg.Color('#f4d80b')
+                fragment_color = pg.Color('#ea4915')
+
                 if show_all:
                     # Draws all game objects onto screen if show_all is True
                     for o in obstacle_list_type:
                         pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
                     for treasure in treasure_list:
-                        pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                        pg.draw.rect(self.screen, treasure_color, treasure)
                     for fragment in fragment_list:
-                        pg.draw.rect(self.screen, (193, 44, 31), fragment)
+                        pg.draw.rect(self.screen, fragment_color, fragment)
                 else:
                     # Otherwise, utilizes vision field function
                     path_pos = game.path.all_pos()
@@ -259,10 +264,10 @@ class GameDisplay:
                             pg.draw.rect(self.screen, object_type[o[1]][0], o[0])
                     for treasure in treasure_list:
                         if treasure.collidelist(vision_rects) != -1:
-                            pg.draw.rect(self.screen, (248, 188, 49), treasure)
+                            pg.draw.rect(self.screen, treasure_color, treasure)
                     for fragment in fragment_list:
                         if fragment.collidelist(vision_rects) != -1:
-                            pg.draw.rect(self.screen, (193, 44, 31), fragment)
+                            pg.draw.rect(self.screen, '#ea4915', fragment)
 
                 # Adds grid to the screen
                 self.draw_grid(40)
