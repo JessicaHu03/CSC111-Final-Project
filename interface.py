@@ -218,7 +218,7 @@ class GameDisplay:
                             all(x not in margins for x in center_pos):
                         available_movements.append(move)
 
-                event_key = None
+                treasure_obtainable = True
                 for event in pg.event.get():
                     if event.type == QUIT:
                         exit_game = True
@@ -233,7 +233,28 @@ class GameDisplay:
                             rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
                             player_rect.move_ip(pos_change)
 
-                            game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
+                            # Checks for fragment and treasure collision
+                            # Treasure Collision
+                            treasure_collision_index = player_rect.collidelist(treasure_list)
+                            if treasure_collision_index != -1:
+                                # With at least 3 fragments on treasure collision
+                                if game.player.backpack['fragments'] >= 3:
+                                    # Remove collided treasure from list
+                                    del treasure_list[treasure_collision_index]
+                                    game.player.update_backpack('treasures', 1)
+                                    game.player.update_backpack('fragments', -3)
+                                # Not enough fragments on treasure collision
+                                else:
+                                    treasure_obtainable = False
+                                    # Moves player back to their last position
+                                    pos_change = dir_key[dir_opposite[event_key]]
+                                    rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
+                                    player_rect.move_ip(pos_change)
+                                    # Prints info message
+                                    self.not_enough_fragment()
+
+                            if treasure_obtainable:
+                                game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
 
                         if event.key == K_f:
                             show_all = not show_all
@@ -308,24 +329,6 @@ class GameDisplay:
                             pg.draw.line(self.screen, line_color, init_pos, end_pos)
 
                 is_paused = False
-                # Checks for fragment and treasure collision
-                # Treasure Collision
-                treasure_collision_index = player_rect.collidelist(treasure_list)
-                if treasure_collision_index != -1:
-                    # With at least 3 fragments on treasure collision
-                    if game.player.backpack['fragments'] >= 3:
-                        # Remove collided treasure from list
-                        del treasure_list[treasure_collision_index]
-                        game.player.update_backpack('treasures', 1)
-                        game.player.update_backpack('fragments', -3)
-                    # Not enough fragments on treasure collision
-                    else:
-                        # Moves player back to their last position
-                        pos_change = dir_key[dir_opposite[event_key]]
-                        rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
-                        player_rect.move_ip(pos_change)
-                        # Prints info message
-                        self.not_enough_fragment()
 
                 # Fragment Collision
                 fragment_collision_index = player_rect.collidelist(fragment_list)
