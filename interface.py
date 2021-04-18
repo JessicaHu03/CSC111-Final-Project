@@ -303,7 +303,6 @@ class GameDisplay:
                             pg.draw.line(self.screen, line_color, initial_pos, temp_pos)
                             initial_pos = temp_pos
 
-
                 is_paused = False
                 # Checks for fragment and treasure collision
                 # Treasure Collision
