@@ -116,6 +116,7 @@ class GameDisplay:
         pg.display.set_caption("Treasure Hunt game!")
 
         # Game Loop
+        draw_path = False
         draw_grid = True
         show_all = False
         exit_game = False
@@ -239,6 +240,9 @@ class GameDisplay:
                         if event.key == K_g:
                             draw_grid = not draw_grid
 
+                        if event.key == K_q:
+                            draw_path = not draw_path
+
                 # Fills screen
                 self.screen.fill((248, 186, 182))
 
@@ -287,6 +291,18 @@ class GameDisplay:
                     game.game_map.reset()
                     game_start = False
                     pause.reset()
+
+                # Showing the path of the player
+                if draw_path:
+                    path_graph = game.path.get_graph().get_vertices()
+                    initial_pos = game.path.initial_pos
+                    line_color = pg.Color('#8c8c91')
+                    for v in path_graph:
+                        for neighbors in path_graph[v]:
+                            temp_pos = path_graph[v].pos
+                            pg.draw.line(self.screen, line_color, initial_pos, temp_pos)
+                            initial_pos = temp_pos
+
 
                 is_paused = False
                 # Checks for fragment and treasure collision
