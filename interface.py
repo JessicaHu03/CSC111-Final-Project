@@ -34,7 +34,7 @@ class GameDisplay:
 
         The drawn grid has GRID_SIZE columns and rows.
         """
-        color = (0, 0, 0)
+        color = (255, 255, 255)
         width, height = self.screen.get_size()
 
         for col in range(1, div):
@@ -116,6 +116,7 @@ class GameDisplay:
         pg.display.set_caption("Treasure Hunt game!")
 
         # Game Loop
+        draw_grid = True
         show_all = False
         exit_game = False
         game_start = False
@@ -232,15 +233,18 @@ class GameDisplay:
                         if event.key == K_ESCAPE:
                             is_paused = not is_paused
 
+                        if event.key == K_g:
+                            draw_grid = not draw_grid
+
                 # Fills screen
-                self.screen.fill((243, 166, 148))
+                self.screen.fill((248, 186, 182))
 
                 # Draws player rectangle object onto screen
                 pg.draw.rect(self.screen, (255, 255, 255), player_rect)
 
                 # Sets color for fragment and treasures
-                treasure_color = pg.Color('#f4d80b')
-                fragment_color = pg.Color('#ea4915')
+                treasure_color = pg.Color('#fdcc33')
+                fragment_color = pg.Color('#f25805')
 
                 if show_all:
                     # Draws all game objects onto screen if show_all is True
@@ -270,7 +274,8 @@ class GameDisplay:
                             pg.draw.rect(self.screen, '#ea4915', fragment)
 
                 # Adds grid to the screen
-                self.draw_grid(40)
+                if draw_grid:
+                    self.draw_grid(40)
 
                 if pause.display(is_paused) == 'exit':
                     player_rect.topleft = game.path.initial_pos
