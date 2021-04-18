@@ -6,6 +6,9 @@ from typing import Tuple, List, Any
 from pygame_gui.core import IncrementalThreadedResourceLoader
 
 
+SCREEN_COLOR = (155, 221, 249)
+
+
 class Menu:
     menu_type: str
     screen: pg.Surface
@@ -97,7 +100,7 @@ class NameEntry(Menu):
 
             self.manager.update(time_delta)
 
-            self.screen.fill((243, 166, 148))
+            self.screen.fill(SCREEN_COLOR)
             self.manager.draw_ui(self.screen)
 
             pg.display.update()
@@ -155,7 +158,7 @@ class MainMenu(Menu):
                         if option_info[0].collidepoint(mouse_pos):
                             self.return_option = option_info[1]
                             on = False
-            self.screen.fill((191, 192, 150))
+            self.screen.fill(SCREEN_COLOR)
 
             default_color = (154, 167, 177)
             hover_color = (243, 166, 148)
@@ -256,7 +259,7 @@ class Settings(Menu):
 
             self.manager.update(time_delta)
 
-            self.screen.fill((223, 206, 180))
+            self.screen.fill(SCREEN_COLOR)
             self.manager.draw_ui(self.screen)
 
             pg.display.update()

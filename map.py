@@ -34,6 +34,7 @@ class GameMap:
     def __init__(self, screen_size: Tuple[int, int], div: int, autogen: bool, difficulty: Optional[int] = 4):
         """Initializes GameMap object with the given game difficulty, movement step size,
         and window size"""
+
         self._width = screen_size[0]
         self._height = screen_size[1]
         self._difficulty = difficulty
@@ -41,10 +42,10 @@ class GameMap:
         self._v_step = int(self._height / div)
         self._div = div
         self._object_type = {
-            'rock': ((236, 217, 199), 2),
-            'river': ((90, 164, 174), 3),
-            'fragment': ((193, 44, 31), 1),
-            'treasure': ((248, 188, 49), 1/2)
+            'rock': ((128, 120, 141), 2),
+            'river': ((73, 148, 196), 3),
+            'fragment': ((0, 0, 0), 1),
+            'treasure': ((0, 0, 0), 1/2)
         }
         self._obstacles = list()
         self._treasures = list()
