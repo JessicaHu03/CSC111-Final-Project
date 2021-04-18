@@ -29,11 +29,19 @@ class Game:
         self.screen_size = screen_size
         self.div = div
         self.map_list = []
+        self.path_list = []
+        self.player = Player('Default')
 
     def set_map(self, map_id):
         """Set the current map given the map index"""
         assert map_id < len(self.map_list)
         self.game_map = self.map_list[map_id - 1]
+
+    def reset_path(self):
+        """Resets the current path of the game"""
+        pos = (int(self.screen_size[0] / self.div - self.player_rect[0] / 2),
+               int(self.screen_size[1] / 2 - self.player_rect[1] / 2))
+        self.path = Path(initial_pos=pos, map_id=self.game_map.map_id, player_id=self.player.player_id)
 
     def generate_maps(self, num: int, difficulty: int) -> None:
         """Generates a set number of maps, which are saved to 'maps/'"""
@@ -51,11 +59,10 @@ class Game:
         # Reading game maps
         if map_num != 0:
             for i in range(1, map_num + 1):
-                map_name = 'map{}.csv'.format(i)
-                map_dir = os.path.join(r'maps\\', map_name)
+                map_name = 'map{}'.format(i)
 
                 new_map = GameMap(self.screen_size, self.div, False)
-                new_map.read_map(map_dir)
+                new_map.read_map(map_name)
                 self.map_list.append(new_map)
 
         # Reading paths

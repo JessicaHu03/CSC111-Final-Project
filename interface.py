@@ -11,6 +11,7 @@ from path import Path
 from player import Player
 from map import GameMap
 import os
+import copy
 
 
 class GameDisplay:
@@ -125,19 +126,21 @@ class GameDisplay:
         main_menu = menu.MainMenu(self.screen_size, self.screen)
         pause = menu.Pause(self.screen_size, self.screen)
 
+        # Initializes player rect object
         rect_size = (8, 8)
-        rect_pos = game.path.initial_pos
-
-        game.player.set_vision_radius(20)
-        vision_radius = game.player.get_vision_radius()
-        # This is for returning the player upon treasure collision with not enough fragments
+        rect_pos = (0, 0)
         player_rect = pg.Rect(rect_pos, rect_size)
 
         while not exit_game:
             name_on = not player_set
             settings_on = False
 
-            name_entry.display(name_on)
+            name_input = name_entry.display(name_on)
+            if not player_set:
+                game.player = Player(name_input)
+                game.player.set_vision_radius(20)
+
+            vision_radius = game.player.get_vision_radius()
             player_set = True
 
             if game_start:
@@ -147,18 +150,34 @@ class GameDisplay:
 
             main_option = main_menu.display(menu_on)
             if main_option == 'Start':
+                game.set_map(1)
+                game.reset_path()
+
+                rect_pos = game.path.initial_pos
+
+                player_rect = pg.Rect(rect_pos, rect_size)
+
                 game_start = True
+
+                main_menu.return_option = ''
             elif main_option == 'Settings':
                 settings_on = True
-            else:
+            elif main_option == 'Quit':
                 exit_game = True
+            else:
+                pass
 
-            settings_menu.display(settings_on)
+            settings_option = settings_menu.display(settings_on)
+            if settings_option == 'logout':
+                player_set = False
+                settings_menu.option = ''
             map_id = settings_menu.map_id
+            # TODO Implement Shortest Path function as a mod
             current_mode = settings_menu.mode
 
+            # Sets game map id given by settings
             game.set_map(map_id)
-
+            game.path.set_map(map_id)
             # Defines player movement step size
             h_step, v_step = game.game_map.get_step()
 
@@ -178,6 +197,7 @@ class GameDisplay:
             # Assign keys to those for opposite direction. This is for reversing a move
             dir_opposite = {K_LEFT: K_RIGHT, K_RIGHT: K_LEFT, K_UP: K_DOWN, K_DOWN: K_UP}
 
+            # Game window
             if game_start:
                 # Checks for possible movements given obstacles in the current map
                 possible_movements = ['left', 'right', 'up', 'down']
@@ -247,13 +267,15 @@ class GameDisplay:
                 # Adds grid to the screen
                 self.draw_grid(40)
 
-                pause_option = pause.display(is_paused)
-                is_paused = False
-                if pause_option == 'exit':
+                if pause.display(is_paused) == 'exit':
+                    player_rect.topleft = game.path.initial_pos
+                    game.reset_path()
                     game.player.reset()
+                    game.game_map.reset()
                     game_start = False
                     pause.reset()
 
+                is_paused = False
                 # Checks for fragment and treasure collision
                 # Treasure Collision
                 treasure_collision_index = player_rect.collidelist(treasure_list)
@@ -282,10 +304,26 @@ class GameDisplay:
 
                 # On winning game
                 if game.player.backpack['treasures'] == game.game_map.get_difficulty():
+                    # Keeps record of move_count
+                    move_count = copy.deepcopy(game.path.move_count)
+                    # Reset player position
+                    player_rect.topleft = game.path.initial_pos
+                    # Saves current game score to player data and resets player
                     game.player.update_data(game.game_map.get_difficulty())
                     game.player.reset()
-                    self.game_end(game.path.move_count)
-                    exit_game = True
+
+                    # Saves the current path to file
+                    game.path.write_path()
+                    # The reset path function is part of the Game class, contrary to GameMap and Player
+                    # This is path requires a given map and player, which are obtained from game.
+                    game.reset_path()
+
+                    # Resets the game objects in the current GameMap
+                    game.game_map.reset()
+
+                    self.game_end(move_count)
+
+                    game_start = False
 
                 # Display current number of fragments and treasures the player has found
                 self.show_score(game)

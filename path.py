@@ -106,7 +106,7 @@ class Graph:
 class Path:
     """A path that records player's path movements utilizing the Graph
     data structure"""
-    id: int
+    path_id: int
     move_count: int
     initial_pos: Tuple[int, int]
     _map_id: int
@@ -129,6 +129,10 @@ class Path:
     def get_graph(self) -> Graph:
         """Return the Graph"""
         return self._graph
+
+    def set_map(self, map_id: int) -> None:
+        """Sets the corresponding game_map for path"""
+        self._map_id = map_id
 
     def all_pos(self) -> List[Tuple[int, int]]:
         """Return all the past positions of the player"""
@@ -153,7 +157,7 @@ class Path:
         """Saves relevant information for the current path to file"""
         # Returns number of existing paths from directory
         path_num = len([m for m in os.listdir('paths/')])
-        self.id = path_num + 1
+        self.path_id = path_num + 1
 
         # Retrieves specific object information, save to dataframe
         player_id = pd.DataFrame({'player_id': self._player_id}, index=[0])
@@ -170,7 +174,7 @@ class Path:
                                 axis=1, ignore_index=False)
 
         # Sets new path name. This is given by 'path' + the path index.
-        path_name = 'path{}.csv'.format(self.id)
+        path_name = 'path{}.csv'.format(self.path_id)
         # Saves map file to directory
         object_info.to_csv(os.path.join(r'paths\\', path_name), index=False)
 

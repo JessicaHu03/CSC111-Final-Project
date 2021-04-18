@@ -53,17 +53,14 @@ class Player:
 
     def update_data(self, difficulty: int) -> None:
         """Updates player data saved in player_stat.csv"""
-        self.games_played += 1
-        self.treasure_count += difficulty
-
         df = pd.read_csv('player_stat.csv', index_col='player_id')
         try:
             df_player = df.loc[self.player_id]
         except KeyError:
-            df.loc[self.player_id] = [self.games_played, self._vision_field, self.treasure_count]
+            df.loc[self.player_id] = [1, self._vision_field, difficulty]
         else:
-            df_player.loc['games_played'] = self.games_played
-            df_player.loc['treasure_count'] = self.treasure_count
+            df_player.loc['games_played'] += 1
+            df_player.loc['treasures'] += difficulty
             df.loc[self.player_id] = df_player
 
         df.to_csv('player_stat.csv')

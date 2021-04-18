@@ -16,7 +16,7 @@ class GameMap:
     The difficulty attribute indicates the number of obstacles that will occupy the map,
     and how many fragments and treasures are needed to be found.
     """
-    id: int
+    map_id: int
     _width: int
     _height: int
     _difficulty: int
@@ -49,9 +49,29 @@ class GameMap:
         self._obstacles = list()
         self._treasures = list()
         self._fragments = list()
+        self._treasures_copy = list()
+        self._fragments_copy = list()
         if autogen:
             self.generate_obstacles()
             self.generate_treasures()
+            self.set_object_copy()
+        self.map_id = 1
+
+    def reset(self) -> None:
+        """Resets the treasures and fragments in the map
+
+        This is required because when 'del' is used inside the game loop, it actually
+        follows its memory location and removes the corresponding fragments and treasures
+        from the map itself. Thus, we need reset map on each game_exit to ensure that
+        the fragments and treasures actually gets back to their original state.
+        """
+        self._treasures = self._treasures_copy
+        self._fragments = self._fragments_copy
+
+    def set_object_copy(self) -> None:
+        """Sets a copy of the generated fragments and treasures"""
+        self._treasures_copy = self._treasures.copy()
+        self._fragments_copy = self._fragments.copy()
 
     def get_obstacles(self) -> List[Tuple[pg.Rect, str]]:
         """Return the generated obstacles of this map"""
@@ -84,6 +104,10 @@ class GameMap:
         """Return the width and height of the screen"""
         return self._width, self._height
 
+    def set_id(self, map_id: int) -> None:
+        """Sets the according map ID"""
+        self.map_id = map_id
+
     def generate_objects_from_info(self) -> None:
         """This is for using the information read from a map file to generate relevant
         game objects. However it uses its own attributes(e.g. self._obstacle_info) as
@@ -109,6 +133,8 @@ class GameMap:
             treasure_rect = pg.Rect(rect)
             treasures.append(treasure_rect)
         self._treasures = treasures
+
+        self.set_object_copy()
 
     def generate_obstacles(self) -> None:
         """Generates the obstacles on the map with the required obstacle types.
@@ -252,7 +278,7 @@ class GameMap:
         """Save the current map information to a new file under directory 'maps', with name map[num].csv"""
         # Returns number of existing maps from directory
         map_num = len([m for m in os.listdir('maps/')])
-        self.id = map_num + 1
+        self.map_id = map_num + 1
         # Retrieves specific object information, save to dataframe
         obstacle_info = pd.DataFrame({'obstacle': [x[0] for x in self.get_object_info()[0]]})
         obstacle_type = pd.DataFrame({'obstacle_type': [x[1] for x in self.get_object_info()[0]]})
@@ -269,15 +295,16 @@ class GameMap:
                                 axis=1, ignore_index=False)
 
         # Sets new map name. This is given by 'maps' + the map index.
-        map_name = 'map{}.csv'.format(self.id)
+        map_name = 'map{}.csv'.format(self.map_id)
         # Saves map file to directory
         object_info.to_csv(os.path.join(r'maps\\', map_name), index=False)
 
-    def read_map(self, map_file: str):
+    def read_map(self, map_name: str):
         """Reads a game map from file, retrieving all relevant information required
         to generate a map"""
+        map_dir = os.path.join(r'maps\\', (map_name + '.csv'))
         # Reading game_map type file
-        df = pd.read_csv(map_file, index_col=False)
+        df = pd.read_csv(map_dir, index_col=False)
 
         # Retrieve game objects and settings for map, indexing by column name
         # The concatenation of different length DataFrames result in NA values,
@@ -307,6 +334,7 @@ class GameMap:
         self._fragment_info = fragment_info
         self._difficulty = difficulty
         self.generate_objects_from_info()
+        self.map_id = int(map_name[-1])
 
 
 # Helper functions

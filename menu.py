@@ -70,7 +70,7 @@ class NameEntry(Menu):
         self._enter_button = button
         self._player_name = ''
 
-    def display(self, on):
+    def display(self, on) -> str:
         while on:
             time_delta = self.clock.tick(60) / 1000.0
             for event in pg.event.get():
@@ -101,6 +101,7 @@ class NameEntry(Menu):
             self.manager.draw_ui(self.screen)
 
             pg.display.update()
+        return self._player_name
 
 
 class MainMenu(Menu):
@@ -117,6 +118,7 @@ class MainMenu(Menu):
         self.screen = screen
         self.add_options('Start')
         self.add_options('Settings')
+        self.add_options('Quit')
         self.option_rects = []
         self.option_info = []
         self.return_option = ''
@@ -225,7 +227,7 @@ class Settings(Menu):
         self.mode = 'User Control'
         self.option = ''
 
-    def display(self, on):
+    def display(self, on) -> str:
         while on:
             time_delta = self.clock.tick(60) / 1000.0
             for event in pg.event.get():
