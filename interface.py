@@ -203,11 +203,14 @@ class GameDisplay:
             if game_start:
                 # Checks for possible movements given obstacles in the current map
                 possible_movements = ['left', 'right', 'up', 'down']
+                margins = [0, 800]
                 available_movements = []
                 for move in possible_movements:
                     new_pos = next_pos(rect_pos, move, h_step, v_step)
+                    center_pos = [new_pos[0] + rect_size[0] / 2, new_pos[1] + rect_size[1] / 2]
                     new_rect = pg.Rect(new_pos, rect_size)
-                    if new_rect.collidelist(obstacle_list) == -1:
+                    if new_rect.collidelist(obstacle_list) == -1 and \
+                            all(x not in margins for x in center_pos):
                         available_movements.append(move)
 
                 event_key = None

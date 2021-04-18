@@ -6,7 +6,8 @@ from typing import Tuple, List, Any
 from pygame_gui.core import IncrementalThreadedResourceLoader
 
 
-SCREEN_COLOR = (155, 221, 249)
+SCREEN_COLOR = pg.Color('#9bddf9')
+SETTINGS_COLOR = pg.Color('#6bb6ff')
 
 
 class Menu:
@@ -29,8 +30,10 @@ class Menu:
         self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json', resource_loader=loader)
 
         self.manager.add_font_paths(font_name='IndieFlower', regular_path='fonts/IndieFlower-Regular.ttf')
+        self.manager.add_font_paths(font_name='LoungeThings', regular_path='fonts/Lounge-Things.otf')
 
-        font_list = [{'name': 'IndieFlower', 'point_size': 18, 'style': 'regular'}]
+        font_list = [{'name': 'IndieFlower', 'point_size': 30, 'style': 'regular'},
+                     {'name': 'LoungeThings', 'point_size': 30, 'style': 'regular'}]
         self.manager.preload_fonts(font_list)
 
         loader.start()
@@ -54,21 +57,23 @@ class NameEntry(Menu):
         text_rect_pos = (int(screen_size[0] / 2 - 150), int(screen_size[1] / 2))
         text_rect = pg.Rect(text_rect_pos, (200, 60))
         text_entry = pg_gui.elements.UITextEntryLine(relative_rect=text_rect,
-                                                     manager=self.manager)
+                                                     manager=self.manager,
+                                                     object_id='#' + str(1) + ',' + str(0))
 
         # Create Enter Button
-        button_rect_pos = (int(screen_size[0] / 2 + 100), int(screen_size[1] / 2 - 5))
+        button_rect_pos = (int(screen_size[0] / 2 + 80), int(screen_size[1] / 2))
         button_rect = pg.Rect(button_rect_pos, (80, 40))
         button = pg_gui.elements.UIButton(relative_rect=button_rect,
                                           text='Enter',
                                           manager=self.manager,
                                           object_id='#' + str(1) + ',' + str(1))
 
-        info_rect_pos = (int(screen_size[0] / 2 - 150 - 5), int(screen_size[1] / 2 - 70))
-        info_rect = pg.Rect(info_rect_pos, (230, 50))
+        info_rect_pos = (int(screen_size[0] / 2 - 150), int(screen_size[1] / 2 - 40))
+        info_rect = pg.Rect(info_rect_pos, (220, 45))
         info_text = pg_gui.elements.UITextBox(relative_rect=info_rect,
                                               html_text="Please enter your name:",
-                                              manager=self.manager)
+                                              manager=self.manager,
+                                              object_id='#' + str(1) + ',' + str(2))
         self._name_entry = text_entry
         self._enter_button = button
         self._player_name = ''
@@ -259,7 +264,7 @@ class Settings(Menu):
 
             self.manager.update(time_delta)
 
-            self.screen.fill(SCREEN_COLOR)
+            self.screen.fill(SETTINGS_COLOR)
             self.manager.draw_ui(self.screen)
 
             pg.display.update()

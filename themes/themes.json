@@ -10,28 +10,25 @@
         }
     },
 
-    "text_box":
+    "#1,0":
     {
         "colours":
         {
             "normal_text": "#202020",
-            "normal_border": "#202020",
-            "dark_bg": "#A0A0A0",
-            "link_text": "#C0E0FF"
+            "normal_border": "#FF000000",
+            "dark_bg": "#FF000000"
         },
         "misc":
         {
             "shape": "rectangle",
-            "shape_corner_radius": "15",
-            "border_width": "0"
+            "border_width": "2",
+            "shadow_width": "3"
         },
         "font":
         {
-            "name": "IndieFlower",
-            "size": "18",
-            "bold": "1",
-            "italic": "0",
-            "regular_path": "fonts/IndieFlower-Regular.ttf"
+            "name": "LoungeThings",
+            "size": "23",
+            "regular_path": "fonts/Lounge-Things.otf"
         }
     },
 
@@ -39,12 +36,12 @@
     {
       "colours":
        {
-           "normal_bg": "#3083cf",
+           "normal_bg": "#70c1fd",
            "hovered_bg": "#35393e",
            "disabled_bg": "#25292e",
            "selected_bg": "#25292e",
            "active_bg": "#193784",
-           "normal_text": "#20df82",
+           "normal_text": "#21262d",
            "hovered_text": "#FFFFFF",
            "selected_text": "#FFFFFF",
            "disabled_text": "#6d736f",
@@ -55,75 +52,76 @@
            "selected_border": "#8080B0",
            "active_border": "#8080B0"
        },
-       "font":
+       "misc":
        {
-           "name": "IndieFlower",
-           "size": "18",
-           "bold": "1",
-           "italic": "0",
-           "regular_path": "fonts/IndieFlower-Regular.ttf"
-       }
+            "border_width": "0",
+            "shadow_width": "0"
+       },
+       "font":
+        {
+            "name": "LoungeThings",
+            "size": "24",
+            "bold": "2",
+            "italic": "0",
+            "regular_path": "fonts/Lounge-Things.otf"
+        }
+    },
+
+    "#1,2":
+    {
+        "colours":
+        {
+            "normal_text": "#202020",
+            "normal_border": "#FF000000",
+            "dark_bg": "#FF000000",
+            "link_text": "#C0E0FF"
+        },
+        "misc":
+        {
+            "shape": "rectangle",
+            "border_width": "0",
+            "shadow_width": "0"
+        },
+        "font":
+        {
+            "name": "LoungeThings",
+            "size": "30",
+            "bold": "3",
+            "italic": "0",
+            "regular_path": "fonts/Lounge-Things.otf"
+        }
     },
 
     "drop_down_menu":
     {
         "colours":
         {
-            "dark_bg": "#A0A0A0"
+            "normal_bg": "#4d43bc"
         },
         "misc":
         {
-            "shape": "rounded_rectangle",
-            "border_width": "5",
-            "shadow_width": "8",
-            "shape_corner_radius": "8"
-        }
-    },
-    "drop_down_menu.button":
-    {
-        "colours":
-        {
-            "normal_bg": "#9090D000"
+            "shape": "rectangle",
+            "border_width": "1",
+            "shadow_width": "3",
+            "shape_corner_radius": "3"
         },
-        "misc":
+        "font":
         {
-            "shape": "rounded_rectangle",
-            "border_width": "0",
-            "shadow_width": "0",
-            "shape_corner_radius": "5"
+            "name": "LoungeThings",
+            "size": "14",
+            "bold": "0",
+            "italic": "0",
+            "regular_path": "fonts/Lounge-Things.otf"
         }
     },
-
-    "vertical_scroll_bar":
-    {
-        "colours":
-        {
-            "dark_bg": "#A0A0A0"
-        },
-        "misc":
-        {
-            "shape": "rounded_rectangle",
-            "shape_corner_radius": "13",
-            "border_width": "2"
-        }
-    },
-
-    "panel":
+    "drop_down_menu.#drop_down_options_list":
     {
         "misc":
         {
-            "border_width": "5",
-            "shadow_width": "8",
-            "shape_corner_radius": "8"
-        }
-    },
-
-    "selection_list":
-    {
-        "misc":
-        {
-            "border_width": "5",
-            "shadow_width": "2"
+            "shape": "rectangle",
+            "border_width": "2",
+            "shadow_width": "3",
+            "shape_corner_radius": "2"
         }
     }
 }
