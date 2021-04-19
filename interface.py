@@ -152,7 +152,8 @@ class GameDisplay:
         pg.mixer.music.set_volume(0.03)
         pg.mixer.music.play(-1)
         # river_sound =
-        # rock_sound =
+        rock_sound = pg.mixer.Sound('music/rock.mp3')
+        rock_sound.set_volume(0.1)
         treasure_sound = pg.mixer.Sound('music/treasure.wav')
         treasure_sound.set_volume(0.1)
         fragment_sound = pg.mixer.Sound('music/fragment.mp3')
@@ -250,6 +251,8 @@ class GameDisplay:
                         pg.quit()
 
                     if event.type == KEYDOWN:
+                        if event.key in dir_key and dir_name[event.key] not in available_movements:
+                            rock_sound.play()
                         # Assign rectangle movements according to key event if movement is valid
                         if event.key in dir_key and dir_name[event.key] in available_movements:
                             event_key = event.key
