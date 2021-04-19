@@ -2,7 +2,7 @@ import os
 import pygame as pg
 from pygame.locals import *
 import pygame_gui as pg_gui
-from typing import Tuple, List, Any, Dict
+from typing import Tuple, List, Dict
 from pygame_gui.core import IncrementalThreadedResourceLoader
 
 
@@ -359,4 +359,3 @@ class Pause(Menu):
 
     def reset(self):
         self.return_option = ''
-

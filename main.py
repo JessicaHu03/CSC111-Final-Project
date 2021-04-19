@@ -3,8 +3,6 @@ Main execution file for CSC111 Final Project
 """
 from interface import GameDisplay
 from game import Game
-from player import Player
-from path import Path
 
 
 if __name__ == "__main__":

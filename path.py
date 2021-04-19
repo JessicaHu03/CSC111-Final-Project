@@ -207,7 +207,6 @@ class Path:
                         return path_gen
                 visited.append(vertex)
 
-
     def write_path(self) -> None:
         """Saves relevant information for the current path to file"""
         # Returns number of existing paths from directory
@@ -232,7 +231,6 @@ class Path:
         path_name = 'path{}.csv'.format(self.path_id)
         # Saves map file to directory
         object_info.to_csv(os.path.join(r'paths\\', path_name), index=False)
-
 
     def read_path(self, path_file: str) -> None:
         """Reads a path from file, retrieving all relevant information required

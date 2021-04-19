@@ -9,10 +9,7 @@ from typing import Tuple
 import menu
 from path import Path
 from player import Player
-from map import GameMap
-import os
 import copy
-import time
 
 
 class GameDisplay:
@@ -479,32 +476,3 @@ def next_pos(cur_pos: Tuple[int, int], move: str, h_step, v_step) -> Tuple[int, 
                          'down': (cur_pos[0], cur_pos[1] + v_step)}
 
     return possible_next_pos[move]
-
-
-def run():
-    """Runs the game"""
-    # Initializes player
-    ply = Player('Test')
-
-    # New GameMap object with generated game objects
-    map1 = GameMap((800, 800), 40, True)
-    # Save map to file
-    map1.write_map()
-
-    # Retrieve the name of the map that was just saved
-    map_num = len([m for m in os.listdir('maps/')])
-    map_name = 'map{}.csv'.format(map_num)
-    map_path = os.path.join(r'maps\\', map_name)
-    # New GameMap object without any game objects: autogen = False
-    map2 = GameMap((800, 800), 40, False)
-    # Reads from the map that was just saved
-    map2.read_map(map_path)
-
-    # Assign map and player to the Path
-    p = Path((int(20 - 8 / 2), int(400 - 8 / 2)), 1, '1')
-    # Initializes game
-    game = Game()
-
-    # Initializes Game Display
-    display = GameDisplay((800, 800))
-    display.run_game(game)

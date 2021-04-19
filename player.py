@@ -9,7 +9,7 @@ class Player:
 
     Attributes
     ----------
-    user_id : string
+    player_id : string
         Represents the user id of the player.
         This can be used to identify different players on the interface.
     backpack : dict

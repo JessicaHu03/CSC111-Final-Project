@@ -4,7 +4,6 @@ from player import Player
 from map import GameMap
 from path import Path
 import os
-import pandas as pd
 
 
 class Game:
@@ -84,7 +83,3 @@ class Game:
             game_map.write_map()
         for path in self.path_list:
             path.write_path()
-
-
-
-
