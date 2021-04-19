@@ -184,7 +184,8 @@ class Path:
         self._graph.add_edge(current, new_pos)
 
     def shortest_path(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> List[Tuple[int, int]]:
-        """Returns a list of positions that consitutes the shortest path from one position to the next"""
+        """Returns a list of positions that constitutes the shortest path from one position to the next"""
+
         visited = []
 
         current_queue = [[pos1]]
@@ -206,61 +207,61 @@ class Path:
                         return path_gen
                 visited.append(vertex)
 
-    def write_path(self) -> None:
-        """Saves relevant information for the current path to file"""
-        # Returns number of existing paths from directory
-        path_num = len([m for m in os.listdir('paths/')])
-        self.path_id = path_num + 1
 
-        # Retrieves specific object information, save to dataframe
-        player_id = pd.DataFrame({'player_id': self._player_id}, index=[0])
-        map_id = pd.DataFrame({'map_id': self._map_id}, index=[0])
-        initial_pos = pd.DataFrame({'initial_pos': self.initial_pos})
-        vertices = pd.DataFrame({'vertices': self._graph.get_vertices().keys()})
-        neighbours = pd.DataFrame({'neighbours': [[n.pos for n in v.neighbours]
-                                                  for v in self._graph.get_vertices().values()]})
+def write_path(self) -> None:
+    """Saves relevant information for the current path to file"""
+    # Returns number of existing paths from directory
+    path_num = len([m for m in os.listdir('paths/')])
+    self.path_id = path_num + 1
 
-        # Concatenate all information to a single dataframe. This may be bad practice, for that
-        # the elements from one row aren't correlated, and there is a different number of observations
-        # per variable. Using Pandas here is just for code cleanliness and computational simplicity.
-        object_info = pd.concat([vertices, neighbours, initial_pos, player_id, map_id],
-                                axis=1, ignore_index=False)
+    # Retrieves specific object information, save to dataframe
+    player_id = pd.DataFrame({'player_id': self._player_id}, index=[0])
+    map_id = pd.DataFrame({'map_id': self._map_id}, index=[0])
+    initial_pos = pd.DataFrame({'initial_pos': self.initial_pos})
+    vertices = pd.DataFrame({'vertices': self._graph.get_vertices().keys()})
+    neighbours = pd.DataFrame({'neighbours': [[n.pos for n in v.neighbours]
+                                              for v in self._graph.get_vertices().values()]})
 
-        # Sets new path name. This is given by 'path' + the path index.
-        path_name = 'path{}.csv'.format(self.path_id)
-        # Saves map file to directory
-        object_info.to_csv(os.path.join(r'paths\\', path_name), index=False)
+    # Concatenate all information to a single dataframe. This may be bad practice, for that
+    # the elements from one row aren't correlated, and there is a different number of observations
+    # per variable. Using Pandas here is just for code cleanliness and computational simplicity.
+    object_info = pd.concat([vertices, neighbours, initial_pos, player_id, map_id],
+                            axis=1, ignore_index=False)
 
-    def read_path(self, path_file: str) -> None:
-        """Reads a path from file, retrieving all relevant information required
-        to rebuild a path"""
-        # Reading path file
-        df = pd.read_csv(path_file, index_col=False)
-        # Retrieve vertices and settings for path, indexing by column name
-        player_id = df['player_id'][0]
-        map_id = int(df['map_id'][0])
-        initial_pos = df['initial_pos'][0]
-        vertices = df['vertices'].tolist()
-        neighbours = df['neighbours'].tolist()
-
-        # Each value of the DataFrame is of type string, except for the player and map ids
-        # Thus, by evaluating each returns the tuple objects.
-        if vertices and neighbours:
-            vertices = [eval(vertex) for vertex in vertices]
-            neighbours = [eval(neighbour_set) for neighbour_set in neighbours]
-
-        # Assign each neighbour set to their relevant vertex
-        assert len(vertices) == len(neighbours)
-
-        for i in range(len(vertices)):
-            self._graph.add_vertex(vertices[i])
-
-        for i in range(len(vertices)):
-            for j in range(len(neighbours[i])):
-                self._graph.add_edge(vertices[i], neighbours[i][j])
-
-        self.initial_pos = initial_pos
-        self._player_id = player_id
-        self._map_id = map_id
+    # Sets new path name. This is given by 'path' + the path index.
+    path_name = 'path{}.csv'.format(self.path_id)
+    # Saves map file to directory
+    object_info.to_csv(os.path.join(r'paths\\', path_name), index=False)
 
 
+def read_path(self, path_file: str) -> None:
+    """Reads a path from file, retrieving all relevant information required
+    to rebuild a path"""
+    # Reading path file
+    df = pd.read_csv(path_file, index_col=False)
+    # Retrieve vertices and settings for path, indexing by column name
+    player_id = df['player_id'][0]
+    map_id = int(df['map_id'][0])
+    initial_pos = df['initial_pos'][0]
+    vertices = df['vertices'].tolist()
+    neighbours = df['neighbours'].tolist()
+
+    # Each value of the DataFrame is of type string, except for the player and map ids
+    # Thus, by evaluating each returns the tuple objects.
+    if vertices and neighbours:
+        vertices = [eval(vertex) for vertex in vertices]
+        neighbours = [eval(neighbour_set) for neighbour_set in neighbours]
+
+    # Assign each neighbour set to their relevant vertex
+    assert len(vertices) == len(neighbours)
+
+    for i in range(len(vertices)):
+        self._graph.add_vertex(vertices[i])
+
+    for i in range(len(vertices)):
+        for j in range(len(neighbours[i])):
+            self._graph.add_edge(vertices[i], neighbours[i][j])
+
+    self.initial_pos = initial_pos
+    self._player_id = player_id
+    self._map_id = map_id
