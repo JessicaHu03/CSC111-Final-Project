@@ -2,13 +2,12 @@ import os
 import pygame as pg
 from pygame.locals import *
 import pygame_gui as pg_gui
-from typing import Tuple, List, Any
+from typing import Tuple, List, Any, Dict
 from pygame_gui.core import IncrementalThreadedResourceLoader
 
 
 SCREEN_COLOR = pg.Color('#9bddf9')
 SETTINGS_COLOR = pg.Color('#6bb6ff')
-
 
 class Menu:
     menu_type: str
@@ -16,15 +15,22 @@ class Menu:
     screen_size: Tuple[int, int]
     manager: pg_gui.UIManager
     clock: pg.time.Clock
+    sound: Dict[str, pg.mixer.Sound]
 
     def __init__(self, menu_type: str, screen_size: Tuple[int, int], screen: pg.Surface):
         """Initializes menu screen with given menu type and screen_size"""
+        pg.init()
+        pg.mouse.set_cursor(pg.cursors.diamond)
+
+        pause_sound = pg.mixer.Sound('music/pause.wav')
+        pause_sound.set_volume(0.3)
+        click_sound = pg.mixer.Sound('music/click.wav')
+        click_sound.set_volume(0.3)
+
         self.menu_type = menu_type
         self.screen_size = screen_size
         self.screen = screen
-
-        pg.init()
-        pg.mouse.set_cursor(pg.cursors.diamond)
+        self.sound = {'pause': pause_sound, 'click': click_sound}
 
         loader = IncrementalThreadedResourceLoader()
         self.manager = pg_gui.UIManager(screen_size, 'themes/themes.json', resource_loader=loader)
@@ -85,16 +91,15 @@ class NameEntry(Menu):
                 if event.type == pg.QUIT:
                     on = False
                     pg.quit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        on = False
 
                 if event.type == pg.USEREVENT:
                     if event.user_type == pg_gui.UI_TEXT_ENTRY_FINISHED:
+                        self.sound['click'].play()
                         if event.text != '':
                             self._player_name = event.text
                             on = False
                     if event.user_type == pg_gui.UI_BUTTON_PRESSED:
+                        self.sound['click'].play()
                         if self._name_entry.text != '':
                             self._player_name = self._name_entry.text
                             on = False
@@ -164,6 +169,7 @@ class MainMenu(Menu):
                     on = False
                     pg.quit()
                 if event.type == pg.MOUSEBUTTONDOWN:
+                    self.sound['click'].play()
                     for option_info in self.option_info:
                         if option_info[0].collidepoint(mouse_pos):
                             self.return_option = option_info[1]
@@ -250,6 +256,7 @@ class Settings(Menu):
                     pg.quit()
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
+                        self.sound['pause'].play()
                         on = False
 
                 if event.type == pg.USEREVENT:
@@ -259,6 +266,7 @@ class Settings(Menu):
                         if event.ui_element == self._mode_menu:
                             self.mode = event.text
                     if event.user_type == pg_gui.UI_BUTTON_PRESSED:
+                        self.sound['click'].play()
                         if event.ui_element == self._exit:
                             self.option = 'exit'
                             on = False
@@ -310,6 +318,8 @@ class Pause(Menu):
         self.return_option = ''
 
     def display(self, on) -> str:
+        click_sound = pg.mixer.Sound('music/click.wav')
+        click_sound.set_volume(0.3)
         while on:
             time_delta = self.clock.tick(60) / 1000.0
             for event in pg.event.get():
@@ -318,11 +328,13 @@ class Pause(Menu):
                     pg.quit()
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
+                        self.sound['pause'].play()
                         self.return_option = 'continue'
                         on = False
 
                 if event.type == pg.USEREVENT:
                     if event.user_type == pg_gui.UI_BUTTON_PRESSED:
+                        self.sound['click'].play()
                         if event.ui_element == self._exit:
                             self.return_option = 'exit'
                             on = False
