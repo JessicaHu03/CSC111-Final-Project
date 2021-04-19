@@ -70,6 +70,14 @@ class Graph:
         """Returns the number of vertices"""
         return len(self._vertices)
 
+    def get_vertex(self, pos: Tuple[int, int]) -> _Vertex:
+        """Return the vertex at the input position"""
+        return self._vertices[str(pos)]
+
+    def get_vertices(self) -> dict[str, _Vertex]:
+        """Return _vertices"""
+        return self._vertices
+
     def add_vertex(self, pos: Tuple[int, int]) -> None:
         """Add a vertex with the given position to this graph.
 
@@ -95,14 +103,6 @@ class Graph:
             v2.neighbours.add(v1)
         else:
             raise ValueError
-
-    def get_vertex(self, pos: Tuple[int, int]) -> _Vertex:
-        """Return the vertex at the input position"""
-        return self._vertices[str(pos)]
-
-    def get_vertices(self) -> dict[str, _Vertex]:
-        """Return _vertices"""
-        return self._vertices
 
 
 class Path:
@@ -151,15 +151,14 @@ class Path:
         obstacles = [x[0] for x in game_map.get_obstacles()]
         treasures = game_map.get_treasures()
         all_pos = []
-        for i in range(div):
-            for j in range(div):
+        for i in range(1, div):
+            for j in range(1, div):
                 x = int(i * h_step - rect_size[0] / 2)
                 y = int(j * v_step - rect_size[1] / 2)
                 temp_rect = pg.Rect((x, y), rect_size)
                 if temp_rect.collidelist(obstacles) == -1 and temp_rect.collidelist(treasures) == -1:
                     all_pos.append((x, y))
                     self._graph.add_vertex((x, y))
-                    print((x, y))
         for pos1 in all_pos:
             for pos2 in all_pos:
                 if pos1 != pos2:
@@ -183,6 +182,29 @@ class Path:
             self.all_pos.append(new_pos)
 
         self._graph.add_edge(current, new_pos)
+
+    def shortest_path(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> List[Tuple[int, int]]:
+        """Returns a list of positions that consitutes the shortest path from one position to the next"""
+        visited = []
+
+        current_queue = [[pos1]]
+
+        # Traversing graph
+        while current_queue:
+            path = current_queue.pop(0)
+            vertex = path[-1]
+
+            if vertex not in visited:
+                neighbours = self._graph.get_vertex(vertex).neighbours
+
+                for neighbour in neighbours:
+                    path_gen = list(path)
+                    path_gen.append(neighbour.pos)
+                    current_queue.append(path_gen)
+
+                    if neighbour.pos == pos2:
+                        return path_gen
+                visited.append(vertex)
 
     def write_path(self) -> None:
         """Saves relevant information for the current path to file"""

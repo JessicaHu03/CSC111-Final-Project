@@ -12,6 +12,7 @@ from player import Player
 from map import GameMap
 import os
 import copy
+import time
 
 
 class GameDisplay:
@@ -161,6 +162,8 @@ class GameDisplay:
         fragment_sound = pg.mixer.Sound('music/fragment.mp3')
         fragment_sound.set_volume(0.1)
 
+        shortest_path_rect = []
+
         while not exit_game:
             name_on = not player_set
             settings_on = False
@@ -201,7 +204,6 @@ class GameDisplay:
                 player_set = False
                 settings_menu.option = ''
             map_id = settings_menu.map_id
-            # TODO Implement Shortest Path function as a mode
             current_mode = settings_menu.mode
 
             # Sets game map id given by settings
@@ -217,6 +219,7 @@ class GameDisplay:
                         map_paths.append(path_)
                 paths_import = True
 
+                # Generate the general path for the current map. This may slow down performance
                 general_path = Path(initial_pos=(int(self.screen_size[0] / 40 - rect_size[0] / 2),
                                                  int(self.screen_size[1] / 2 - rect_size[1] / 2)))
                 general_path.set_map(map_id)
@@ -257,6 +260,26 @@ class GameDisplay:
                     if event.type == QUIT:
                         exit_game = True
                         pg.quit()
+
+                    if current_mode == 'Shortest Path':
+                        shortest_path = []
+                        # Utilizes Shortest Path function
+                        if event.type == MOUSEBUTTONDOWN:
+                            init_pos = player_rect.topleft
+                            for fragment in fragment_list:
+                                if fragment.collidepoint(pg.mouse.get_pos()):
+                                    final_pos = (int(fragment.centerx - rect_size[0] / 2),
+                                                 int(fragment.centery - rect_size[1] / 2))
+                                    shortest_path = general_path.shortest_path(init_pos, final_pos)
+                            for pos in shortest_path:
+                                path_rect_pos = (pos[0] + 2, pos[1] + 2)
+                                path_rect = pg.Rect(path_rect_pos, (4, 4))
+                                shortest_path_rect.append(path_rect)
+                                pos_change = (pos[0] - init_pos[0], pos[1] - init_pos[1])
+                                rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
+                                player_rect.move_ip(pos_change)
+                                game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
+                                init_pos = rect_pos
 
                     if event.type == KEYDOWN:
                         if event.key in dir_key and dir_name[event.key] not in available_movements:
@@ -322,9 +345,6 @@ class GameDisplay:
                 # Fills screen
                 self.screen.fill((248, 186, 182))
 
-                # Draws player rectangle object onto screen
-                pg.draw.rect(self.screen, (255, 255, 255), player_rect)
-
                 # Sets color for fragment and treasures
                 treasure_color = pg.Color('#fdcc33')
                 fragment_color = pg.Color('#f25805')
@@ -360,6 +380,11 @@ class GameDisplay:
                 if draw_grid:
                     self.draw_grid(40)
 
+                for path_rect in shortest_path_rect:
+                    pg.draw.rect(self.screen, (35, 25, 25), path_rect)
+                # Draws player rectangle object onto screen
+                pg.draw.rect(self.screen, (255, 255, 255), player_rect)
+
                 if pause.display(is_paused) == 'exit':
                     player_rect.topleft = game.path.initial_pos
                     game.reset_path()
@@ -367,10 +392,12 @@ class GameDisplay:
                     game.game_map.reset()
                     game_start = False
                     paths_import = False
+                    shortest_path_rect.clear()
                     pause.reset()
                 is_paused = False
 
                 if draw_all_path:
+                    # Draws all paths for the current map from previous games
                     for i in range(len(map_paths)):
                         if i < len(paths_colors) - 1:
                             path_vertices = map_paths[i].get_graph().get_vertices().values()
@@ -383,6 +410,7 @@ class GameDisplay:
                                     pg.draw.line(self.screen, paths_colors[i], init_pos, end_pos)
 
                 if draw_general_path:
+                    # Draws all possible paths for the current game
                     path_vertices = general_path.get_graph().get_vertices().values()
                     for vertex in path_vertices:
                         pos = vertex.pos
@@ -421,6 +449,7 @@ class GameDisplay:
 
                     # Resets the game objects in the current GameMap
                     game.game_map.reset()
+                    shortest_path_rect.clear()
 
                     self.game_end(move_count)
 
