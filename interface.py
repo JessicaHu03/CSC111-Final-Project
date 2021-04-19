@@ -117,6 +117,7 @@ class GameDisplay:
         line_color = pg.Color('#8c8c91')
 
         # Initializes game loop booleans
+        draw_all_path = False
         draw_path = False
         draw_grid = True
         show_all = False
@@ -124,6 +125,7 @@ class GameDisplay:
         game_start = False
         player_set = False
         is_paused = False
+        paths_import = False
         # Create Game Menu Objects
         name_entry = menu.NameEntry(self.screen_size, self.screen)
         settings_menu = menu.Settings(self.screen_size, self.screen)
@@ -138,6 +140,23 @@ class GameDisplay:
         # Sets default map and path
         game.set_map(1)
         game.reset_path()
+
+        # Initializes empty path list for the current map
+        map_paths = []
+        paths_colors = [pg.Color('#390ac0'), pg.Color('#188418'), pg.Color('#b81118'),
+                        pg.Color('#cb02a6'), pg.Color('#1584af'), pg.Color('#2bacc4'),
+                        pg.Color('#ac83b1'), pg.Color('#4ca13b'), pg.Color('#9c7463')]
+
+        # Initialize music and sound
+        pg.mixer.music.load('music/background.mp3')
+        pg.mixer.music.set_volume(0.03)
+        pg.mixer.music.play(-1)
+        # river_sound =
+        # rock_sound =
+        treasure_sound = pg.mixer.Sound('music/treasure.wav')
+        treasure_sound.set_volume(0.1)
+        fragment_sound = pg.mixer.Sound('music/fragment.mp3')
+        fragment_sound.set_volume(0.1)
 
         while not exit_game:
             name_on = not player_set
@@ -187,6 +206,12 @@ class GameDisplay:
             game.path.set_map(map_id)
             # Defines player movement step size
             h_step, v_step = game.game_map.get_step()
+
+            if not paths_import:
+                for path_ in game.path_list:
+                    if path_.get_map() == map_id:
+                        map_paths.append(path_)
+                paths_import = True
 
             # Obtains game objects from the map
             obstacle_list_type = [(x[0], x[1]) for x in game.game_map.get_obstacles()]
@@ -239,6 +264,7 @@ class GameDisplay:
                             if treasure_collision_index != -1:
                                 # With at least 3 fragments on treasure collision
                                 if game.player.backpack['fragments'] >= 3:
+                                    treasure_sound.play()
                                     # Remove collided treasure from list
                                     del treasure_list[treasure_collision_index]
                                     game.player.update_backpack('treasures', 1)
@@ -265,8 +291,19 @@ class GameDisplay:
                         if event.key == K_g:
                             draw_grid = not draw_grid
 
-                        if event.key == K_q:
+                        if event.key == K_p:
                             draw_path = not draw_path
+
+                        if event.key == K_a:
+                            draw_all_path = not draw_all_path
+
+                # Fragment Collision
+                fragment_collision_index = player_rect.collidelist(fragment_list)
+                if fragment_collision_index != -1:
+                    fragment_sound.play()
+                    # remove collided fragment from list
+                    del fragment_list[fragment_collision_index]
+                    game.player.update_backpack('fragments', 1)
 
                 # Fills screen
                 self.screen.fill((248, 186, 182))
@@ -315,7 +352,21 @@ class GameDisplay:
                     game.player.reset()
                     game.game_map.reset()
                     game_start = False
+                    paths_import = False
                     pause.reset()
+                is_paused = False
+
+                if draw_all_path:
+                    for i in range(len(map_paths)):
+                        if i < len(paths_colors):
+                            path_vertices = map_paths[i].get_graph().get_vertices().values()
+                            for vertex in path_vertices:
+                                pos = vertex.pos
+                                neighbours = vertex.neighbours
+                                for neighbour in neighbours:
+                                    init_pos = (pos[0] + rect_size[0] / 2, pos[1] + rect_size[1] / 2)
+                                    end_pos = (neighbour.pos[0] + rect_size[0] / 2, neighbour.pos[1] + rect_size[1] / 2)
+                                    pg.draw.line(self.screen, paths_colors[i], init_pos, end_pos)
 
                 # Showing the path of the player
                 if draw_path:
@@ -327,15 +378,6 @@ class GameDisplay:
                             init_pos = (pos[0] + rect_size[0] / 2, pos[1] + rect_size[1] / 2)
                             end_pos = (neighbour.pos[0] + rect_size[0] / 2, neighbour.pos[1] + rect_size[1] / 2)
                             pg.draw.line(self.screen, line_color, init_pos, end_pos)
-
-                is_paused = False
-
-                # Fragment Collision
-                fragment_collision_index = player_rect.collidelist(fragment_list)
-                if fragment_collision_index != -1:
-                    # remove collided fragment from list
-                    del fragment_list[fragment_collision_index]
-                    game.player.update_backpack('fragments', 1)
 
                 # On winning game
                 if game.player.backpack['treasures'] == game.game_map.get_difficulty():
@@ -358,6 +400,12 @@ class GameDisplay:
 
                     self.game_end(move_count)
 
+                    # Reread from files
+                    game = Game()
+                    game.read()
+                    game.set_map(map_id)
+
+                    paths_import = False
                     game_start = False
 
                 # Display current number of fragments and treasures the player has found

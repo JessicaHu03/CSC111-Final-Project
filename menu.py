@@ -22,7 +22,7 @@ class Menu:
         pg.init()
         pg.mouse.set_cursor(pg.cursors.diamond)
 
-        pause_sound = pg.mixer.Sound('music/pause.wav')
+        pause_sound = pg.mixer.Sound('music/pause.mp3')
         pause_sound.set_volume(0.3)
         click_sound = pg.mixer.Sound('music/click.wav')
         click_sound.set_volume(0.3)

@@ -138,6 +138,10 @@ class Path:
         """Sets the corresponding game_map for path"""
         self._map_id = map_id
 
+    def get_map(self) -> int:
+        """Returns the corresponding game_map"""
+        return self._map_id
+
     def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)
 
