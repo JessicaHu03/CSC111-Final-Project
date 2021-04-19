@@ -5,6 +5,8 @@ a number of game runs with a fixed map.
 from __future__ import annotations
 from typing import Tuple, List, Optional
 import pandas as pd
+import pygame as pg
+from map import GameMap
 import os
 
 
@@ -141,6 +143,30 @@ class Path:
     def get_map(self) -> int:
         """Returns the corresponding game_map"""
         return self._map_id
+
+    def set_general_paths(self, game_map: GameMap, rect_size: Tuple[int, int]):
+        """Returns a path traversing through all possible routes"""
+        div = game_map.get_div()
+        h_step, v_step = game_map.get_step()
+        obstacles = [x[0] for x in game_map.get_obstacles()]
+        treasures = game_map.get_treasures()
+        all_pos = []
+        for i in range(div):
+            for j in range(div):
+                x = int(i * h_step - rect_size[0] / 2)
+                y = int(j * v_step - rect_size[1] / 2)
+                temp_rect = pg.Rect((x, y), rect_size)
+                if temp_rect.collidelist(obstacles) == -1 and temp_rect.collidelist(treasures) == -1:
+                    all_pos.append((x, y))
+                    self._graph.add_vertex((x, y))
+                    print((x, y))
+        for pos1 in all_pos:
+            for pos2 in all_pos:
+                if pos1 != pos2:
+                    if abs(pos1[0] - pos2[0]) == 0 and abs(pos1[1] - pos2[1]) == v_step:
+                        self._graph.add_edge(pos1, pos2)
+                    if abs(pos1[1] - pos2[1]) == 0 and abs(pos1[0] - pos2[0]) == h_step:
+                        self._graph.add_edge(pos1, pos2)
 
     def update_path(self, new_pos: Tuple[int, int]) -> None:
         """Add a new position (Vertex) to the path (_graph)

@@ -117,6 +117,7 @@ class GameDisplay:
         line_color = pg.Color('#8c8c91')
 
         # Initializes game loop booleans
+        draw_general_path = False
         draw_all_path = False
         draw_path = False
         draw_grid = True
@@ -137,12 +138,13 @@ class GameDisplay:
         rect_pos = (0, 0)
         player_rect = pg.Rect(rect_pos, rect_size)
 
+        map_paths = []
+        general_path = Path((0, 0))
         # Sets default map and path
         game.set_map(1)
         game.reset_path()
 
         # Initializes empty path list for the current map
-        map_paths = []
         paths_colors = [pg.Color('#390ac0'), pg.Color('#188418'), pg.Color('#b81118'),
                         pg.Color('#cb02a6'), pg.Color('#1584af'), pg.Color('#2bacc4'),
                         pg.Color('#ac83b1'), pg.Color('#4ca13b'), pg.Color('#9c7463')]
@@ -199,7 +201,7 @@ class GameDisplay:
                 player_set = False
                 settings_menu.option = ''
             map_id = settings_menu.map_id
-            # TODO Implement Shortest Path function as a mod
+            # TODO Implement Shortest Path function as a mode
             current_mode = settings_menu.mode
 
             # Sets game map id given by settings
@@ -209,10 +211,16 @@ class GameDisplay:
             h_step, v_step = game.game_map.get_step()
 
             if not paths_import:
+                map_paths = []
                 for path_ in game.path_list:
                     if path_.get_map() == map_id:
                         map_paths.append(path_)
                 paths_import = True
+
+                general_path = Path(initial_pos=(int(self.screen_size[0] / 40 - rect_size[0] / 2),
+                                                 int(self.screen_size[1] / 2 - rect_size[1] / 2)))
+                general_path.set_map(map_id)
+                general_path.set_general_paths(game.map_list[map_id-1], rect_size)
 
             # Obtains game objects from the map
             obstacle_list_type = [(x[0], x[1]) for x in game.game_map.get_obstacles()]
@@ -300,6 +308,9 @@ class GameDisplay:
                         if event.key == K_a:
                             draw_all_path = not draw_all_path
 
+                        if event.key == K_h:
+                            draw_general_path = not draw_general_path
+
                 # Fragment Collision
                 fragment_collision_index = player_rect.collidelist(fragment_list)
                 if fragment_collision_index != -1:
@@ -361,7 +372,7 @@ class GameDisplay:
 
                 if draw_all_path:
                     for i in range(len(map_paths)):
-                        if i < len(paths_colors):
+                        if i < len(paths_colors) - 1:
                             path_vertices = map_paths[i].get_graph().get_vertices().values()
                             for vertex in path_vertices:
                                 pos = vertex.pos
@@ -370,6 +381,16 @@ class GameDisplay:
                                     init_pos = (pos[0] + rect_size[0] / 2, pos[1] + rect_size[1] / 2)
                                     end_pos = (neighbour.pos[0] + rect_size[0] / 2, neighbour.pos[1] + rect_size[1] / 2)
                                     pg.draw.line(self.screen, paths_colors[i], init_pos, end_pos)
+
+                if draw_general_path:
+                    path_vertices = general_path.get_graph().get_vertices().values()
+                    for vertex in path_vertices:
+                        pos = vertex.pos
+                        neighbours = vertex.neighbours
+                        for neighbour in neighbours:
+                            init_pos = (pos[0] + rect_size[0] / 2, pos[1] + rect_size[1] / 2)
+                            end_pos = (neighbour.pos[0] + rect_size[0] / 2, neighbour.pos[1] + rect_size[1] / 2)
+                            pg.draw.line(self.screen, paths_colors[0], init_pos, end_pos)
 
                 # Showing the path of the player
                 if draw_path:

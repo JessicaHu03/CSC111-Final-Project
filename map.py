@@ -58,6 +58,9 @@ class GameMap:
             self.set_object_copy()
         self.map_id = 1
 
+    def get_div(self) -> int:
+        return self._div
+    
     def reset(self) -> None:
         """Resets the treasures and fragments in the map
 

@@ -9,6 +9,7 @@ from pygame_gui.core import IncrementalThreadedResourceLoader
 SCREEN_COLOR = pg.Color('#9bddf9')
 SETTINGS_COLOR = pg.Color('#6bb6ff')
 
+
 class Menu:
     menu_type: str
     screen: pg.Surface
