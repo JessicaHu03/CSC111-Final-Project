@@ -125,6 +125,8 @@ class GameDisplay:
         player_set = False
         is_paused = False
         paths_import = False
+        treasures_copied = False
+        treasures_copy = []
         # Create Game Menu Objects
         name_entry = menu.NameEntry(self.screen_size, self.screen)
         settings_menu = menu.Settings(self.screen_size, self.screen)
@@ -226,6 +228,9 @@ class GameDisplay:
             obstacle_list_type = [(x[0], x[1]) for x in game.game_map.get_obstacles()]
             obstacle_list = [x[0] for x in game.game_map.get_obstacles()]
             treasure_list = game.game_map.get_treasures()
+            if not treasures_copied:
+                treasures_copy = copy.deepcopy(treasure_list)
+                treasures_copied = True
             fragment_list = game.game_map.get_fragments()
 
             # Retrieves object types and their relevant information
@@ -259,24 +264,25 @@ class GameDisplay:
                         pg.quit()
 
                     if current_mode == 'Shortest Path':
-                        shortest_path = []
-                        # Utilizes Shortest Path function
-                        if event.type == MOUSEBUTTONDOWN:
-                            init_pos = player_rect.topleft
-                            for fragment in fragment_list:
-                                if fragment.collidepoint(pg.mouse.get_pos()):
-                                    final_pos = (int(fragment.centerx - rect_size[0] / 2),
-                                                 int(fragment.centery - rect_size[1] / 2))
-                                    shortest_path = general_path.shortest_path(init_pos, final_pos)
-                            for pos in shortest_path:
-                                path_rect_pos = (pos[0] + 2, pos[1] + 2)
-                                path_rect = pg.Rect(path_rect_pos, (4, 4))
-                                shortest_path_rect.append(path_rect)
-                                pos_change = (pos[0] - init_pos[0], pos[1] - init_pos[1])
-                                rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
-                                player_rect.move_ip(pos_change)
-                                game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
-                                init_pos = rect_pos
+                        if player_rect.collidelist(treasures_copy) == -1:
+                            shortest_path = []
+                            # Utilizes Shortest Path function
+                            if event.type == MOUSEBUTTONDOWN:
+                                init_pos = player_rect.topleft
+                                for fragment in fragment_list:
+                                    if fragment.collidepoint(pg.mouse.get_pos()):
+                                        final_pos = (int(fragment.centerx - rect_size[0] / 2),
+                                                     int(fragment.centery - rect_size[1] / 2))
+                                        shortest_path = general_path.shortest_path(init_pos, final_pos)
+                                for pos in shortest_path:
+                                    path_rect_pos = (pos[0] + 2, pos[1] + 2)
+                                    path_rect = pg.Rect(path_rect_pos, (4, 4))
+                                    shortest_path_rect.append(path_rect)
+                                    pos_change = (pos[0] - init_pos[0], pos[1] - init_pos[1])
+                                    rect_pos = tuple(map(sum, zip(rect_pos, pos_change)))
+                                    player_rect.move_ip(pos_change)
+                                    game.path.update_path((int(rect_pos[0]), int(rect_pos[1])))
+                                    init_pos = rect_pos
 
                     if event.type == KEYDOWN:
                         if event.key in dir_key and dir_name[event.key] not in available_movements:
@@ -389,6 +395,7 @@ class GameDisplay:
                     game.game_map.reset()
                     game_start = False
                     paths_import = False
+                    treasures_copied = False
                     shortest_path_rect.clear()
                     pause.reset()
                 is_paused = False
@@ -447,6 +454,7 @@ class GameDisplay:
                     # Resets the game objects in the current GameMap
                     game.game_map.reset()
                     shortest_path_rect.clear()
+                    treasures_copied = False
 
                     self.game_end(move_count)
 
