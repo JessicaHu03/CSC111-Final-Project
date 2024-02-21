@@ -1,2 +1,2 @@
 # CSC111-Final-Project
-lol
+Our goal is to build a treasure hunt game that uses the concept of a graph data structure to keep track of a player’s path and allow them to reach a place that they have already explored taking the shortest valid path, considering potential obstacles in the available paths. Pathfinding is an important aspect of our games that contain movement of character in an open map. Games often contain the feature of automatically choosing the shortest path to reach a certain position, and it strongly resembles the idea of the “shortest path” in the graph data structure, which we obtained using DFS algorithm. 
